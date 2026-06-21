@@ -51,7 +51,7 @@ vi.stubGlobal('cancelAnimationFrame', vi.fn());
 describe('Anim233 Core', () => {
   it('should export Anim233 object', () => {
     expect(Anim233).toBeDefined();
-    expect(Anim233.version).toBe('0.3.0');
+    expect(Anim233.version).toBe('1.0.0');
   });
 
   it('should have all API methods', () => {

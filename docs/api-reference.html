@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>API Reference - Anim233</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+</head>
+<body>
+
+<div class="mobile-header"><button class="hamburger">&#9776;</button><h1>Anim233</h1></div>
+<div class="sidebar-overlay"></div>
+<aside class="sidebar">
+  <div class="sidebar-brand"><h1>Anim233</h1><span class="version">v1.0.0</span></div>
+  <nav>
+    <div class="nav-section">Getting Started</div>
+    <a href="index.html">Home</a>
+    <a href="getting-started.html">Installation</a>
+    <div class="nav-section">Core APIs</div>
+    <a href="tween.html">Tween (DOTween)</a>
+    <a href="animation.html">Animate (anime.js)</a>
+    <a href="timeline.html">Timeline</a>
+    <a href="easings.html">Easings</a>
+    <div class="nav-section">Advanced</div>
+    <a href="shader.html">Shader (WebGL)</a>
+    <a href="draggable.html">Draggable</a>
+    <a href="scroll.html">Scroll</a>
+    <a href="text.html">Text Effects</a>
+    <a href="svg.html">SVG Animation</a>
+    <div class="nav-section">Reference</div>
+    <a href="utilities.html">Utilities</a>
+    <a href="api-reference.html">API Reference</a>
+  </nav>
+</aside>
+
+<main class="main">
+  <h1>API Reference</h1>
+  <p>Complete reference for all Anim233 exports. Version <code>1.0.0</code>.</p>
+
+  <h2>Import</h2>
+  <pre><code class="language-javascript">import Anim233 from 'anim233-ts';
+// or
+import { tween, animate, timeline, stagger, ... } from 'anim233-ts';
+// or via CDN global
+const { tween, animate, timeline } = window.Anim233;</code></pre>
+
+  <hr>
+
+  <h2>Anim233 Namespace (Default Export)</h2>
+  <p>The default export is a singleton object containing all API methods.</p>
+  <pre><code class="language-javascript">Anim233.version  // '0.3.0'
+
+// Core Animation
+Anim233.animate(options: AnimationOptions): AnimationInstance
+Anim233.timeline(options?: TimelineOptions): TimelineInstance
+Anim233.tween(target: HTMLElement | HTMLElement[]): TweenInstance
+Anim233.animatable(element: HTMLElement): AnimatableInstance
+Anim233.draggable(target, options?): DraggableInstance
+Anim233.onScroll(options?): ScrollObserverInstance
+Anim233.splitText(target, options?): TextSplitterInstance
+
+// Shader
+Anim233.createShaderAnim233(options: ShaderAnim233Options): ShaderAnim233Instance
+Anim233.createShader(options: ShaderOptions): ShaderAnim233Instance
+
+// Stagger
+Anim233.stagger(value, options?): (index, total) => number
+
+// Utilities
+Anim233.wait(ms): Promise&lt;void&gt;
+Anim233.random(min, max): number
+Anim233.createSeededRandom(seed): () => number
+Anim233.randomPick(array): T
+Anim233.shuffle(array): T[]
+Anim233.round(value, decimals?): number
+Anim233.clamp(value, min, max): number
+Anim233.snap(value, gridValues): number
+Anim233.wrap(value, min, max): number
+Anim233.mapRange(value, inMin, inMax, outMin, outMax): number
+Anim233.lerp(start, end, t): number
+Anim233.damp(start, end, smooth, dt): number
+Anim233.degToRad(deg): number
+Anim233.radToDeg(rad): number
+
+// Easing
+Anim233.registerEasing(name, fn): void
+Anim233.getEasing(name): EasingFunction | undefined
+Anim233.listEasings(): string[]
+
+// Debug
+Anim233.setDebug(debug: boolean): void</code></pre>
+
+  <hr>
+
+  <h2>Types</h2>
+
+  <h3>EasingFunction</h3>
+  <pre><code class="language-javascript">type EasingFunction = (t: number) => number;
+// Input: progress [0..1], Output: eased value [0..1]</code></pre>
+
+  <h3>EasingName</h3>
+  <pre><code class="language-javascript">type EasingName = 'linear' | 'ease' | 'easeIn' | 'easeOut' | 'easeInOut'
+  | 'easeInQuad' | 'easeOutQuad' | 'easeInOutQuad'
+  | 'easeInCubic' | 'easeOutCubic' | 'easeInOutCubic'
+  | 'easeInQuart' | 'easeOutQuart' | 'easeInOutQuart'
+  | 'easeInQuint' | 'easeOutQuint' | 'easeInOutQuint'
+  | 'easeInSine' | 'easeOutSine' | 'easeInOutSine'
+  | 'easeInExpo' | 'easeOutExpo' | 'easeInOutExpo'
+  | 'easeInCirc' | 'easeOutCirc' | 'easeInOutCirc'
+  | 'easeInBack' | 'easeOutBack' | 'easeInOutBack'
+  | 'easeInElastic' | 'easeOutElastic' | 'easeInOutElastic'
+  | 'easeInBounce' | 'easeOutBounce' | 'easeInOutBounce'
+  | string; // custom easing names</code></pre>
+
+  <h3>TweenValue</h3>
+  <pre><code class="language-javascript">type TweenValue = number | string | ((el: HTMLElement, i: number, l: number) => number | string);</code></pre>
+
+  <h3>AnimationTarget</h3>
+  <pre><code class="language-javascript">type AnimationTarget = string | HTMLElement | HTMLElement[] | NodeListOf&lt;HTMLElement&gt;;</code></pre>
+
+  <h3>AnimationOptions</h3>
+  <pre><code class="language-javascript">interface AnimationOptions {
+  targets?: AnimationTarget;
+  properties?: Record&lt;string, any&gt;;
+  delay?: number | ((el: HTMLElement, i: number, l: number) => number);
+  duration?: number;
+  ease?: EasingName | EasingFunction;
+  loop?: number | boolean;
+  loopDelay?: number;
+  alternate?: boolean;
+  reversed?: boolean;
+  autoplay?: boolean;
+  playbackRate?: number;
+  // Callbacks
+  onBegin?: (anim: AnimationInstance) => void;
+  onComplete?: (anim: AnimationInstance) => void;
+  onBeforeUpdate?: (anim: AnimationInstance) => void;
+  onUpdate?: (anim: AnimationInstance) => void;
+  onRender?: (anim: AnimationInstance) => void;
+  onLoop?: (anim: AnimationInstance) => void;
+  onPause?: (anim: AnimationInstance) => void;
+  [key: string]: any; // CSS properties to animate
+}</code></pre>
+
+  <h3>AnimationInstance</h3>
+  <pre><code class="language-javascript">interface AnimationInstance {
+  // Methods
+  play(): void;
+  pause(): void;
+  restart(): void;
+  reverse(): void;
+  alternate(): void;
+  resume(): void;
+  complete(): void;
+  cancel(): void;
+  revert(): void;
+  reset(): void;
+  seek(time: number): void;
+  stretch(newDuration: number): void;
+  then(callback?: () => void): Promise&lt;void&gt;;
+
+  // Properties
+  finished: Promise&lt;void&gt;;
+  currentTime: number;
+  progress: number;
+  duration: number;
+  paused: boolean;
+  reversed: boolean;
+  began: boolean;
+  completed: boolean;
+}</code></pre>
+
+  <h3>TweenInstance</h3>
+  <pre><code class="language-javascript">interface TweenInstance {
+  // Chain methods
+  to(props: Record&lt;string, any&gt;, duration?: number, ease?: string): TweenInstance;
+  from(props: Record&lt;string, any&gt;, duration?: number, ease?: string): TweenInstance;
+  fromTo(from: Record&lt;string, any&gt;, to: Record&lt;string, any&gt;, duration?: number, ease?: string): TweenInstance;
+  set(props: Record&lt;string, any&gt;): TweenInstance;
+  delay(ms: number): TweenInstance;
+  loop(count?: number): TweenInstance;
+  yoyo(enable?: boolean): TweenInstance;
+
+  // Playback
+  play(): void;
+  pause(): void;
+  resume(): void;
+  restart(): void;
+  reverse(): void;
+  kill(): void;
+
+  // Callbacks
+  onBegin(cb: () => void): TweenInstance;
+  onComplete(cb: () => void): TweenInstance;
+  onUpdate(cb: (progress: number) => void): TweenInstance;
+  onLoop(cb: () => void): TweenInstance;
+
+  // Helpers
+  append(cb: () => void): TweenInstance;
+  appendInterval(ms: number): TweenInstance;
+  join(): TweenInstance;
+
+  // Properties
+  duration: number;
+  currentTime: number;
+  progress: number;
+  isPlaying: boolean;
+  isPaused: boolean;
+  isComplete: boolean;
+}</code></pre>
+
+  <h3>TimelineInstance</h3>
+  <pre><code class="language-javascript">interface TimelineInstance {
+  add(animation: AnimationOptions | AnimationInstance | (() => void), timeOffset?: number | string): TimelineInstance;
+  set(properties: Record&lt;string, any&gt;, timeOffset?: number | string): TimelineInstance;
+  sync(animation: AnimationInstance, timeOffset?: number | string): TimelineInstance;
+  label(name: string, timeOffset?: number | string): TimelineInstance;
+  remove(animation: AnimationInstance): void;
+  call(callback: () => void, timeOffset?: number | string): TimelineInstance;
+
+  play(): void;
+  pause(): void;
+  restart(): void;
+  reverse(): void;
+  alternate(): void;
+  resume(): void;
+  complete(): void;
+  cancel(): void;
+  revert(): void;
+  seek(time: number): void;
+  stretch(newDuration: number): void;
+  refresh(): void;
+  then(callback?: () => void): Promise&lt;void&gt;;
+
+  duration: number;
+  currentTime: number;
+  progress: number;
+  paused: boolean;
+  reversed: boolean;
+}</code></pre>
+
+  <h3>AnimatableInstance</h3>
+  <pre><code class="language-javascript">interface AnimatableInstance {
+  set(properties: Record&lt;string, any&gt;): void;
+  revert(): void;
+  [key: string]: any; // Proxy getter/setter
+}</code></pre>
+
+  <h3>DraggableInstance</h3>
+  <pre><code class="language-javascript">interface DraggableInstance {
+  enable(): void;
+  disable(): void;
+  setX(value: number): void;
+  setY(value: number): void;
+  animateInView(): void;
+  scrollInView(): void;
+  stop(): void;
+  reset(): void;
+  revert(): void;
+  refresh(): void;
+
+  x: number;
+  y: number;
+  isDragging: boolean;
+}</code></pre>
+
+  <h3>ScrollObserverInstance</h3>
+  <pre><code class="language-javascript">interface ScrollObserverInstance {
+  link(animations: AnimationInstance | AnimationInstance[]): void;
+  refresh(): void;
+  revert(): void;
+  linked: AnimationInstance[];
+}</code></pre>
+
+  <h3>TextSplitterInstance</h3>
+  <pre><code class="language-javascript">interface TextSplitterInstance {
+  addEffect(fn: (el: HTMLElement, index: number) => void): void;
+  revert(): void;
+  refresh(): void;
+  lines: HTMLElement[];
+  words: HTMLElement[];
+  chars: HTMLElement[];
+}</code></pre>
+
+  <h3>ShaderAnim233Instance</h3>
+  <pre><code class="language-javascript">interface ShaderAnim233Instance {
+  play(): void;
+  pause(): void;
+  stop(): void;
+  setUniform(name: string, value: number | number[] | Float32Array): void;
+  setFragmentShader(source: string): void;
+  setVertexShader(source: string): void;
+  resize(width: number, height: number): void;
+
+  isPlaying: boolean;
+  canvas: HTMLCanvasElement;
+  gl: WebGLRenderingContext;
+}</code></pre>
+
+  <h3>StaggerOptions</h3>
+  <pre><code class="language-javascript">interface StaggerOptions {
+  start?: number;
+  from?: number | 'first' | 'last' | 'center' | 'random';
+  reversed?: boolean;
+  ease?: EasingName | EasingFunction;
+  grid?: [number, number];
+  axis?: 'x' | 'y';
+  modifier?: (value: number, index: number) => number;
+  total?: number;
+}</code></pre>
+
+  <hr>
+
+  <h2>Global Registration</h2>
+  <p>When loaded via CDN or UMD, Anim233 registers on <code>window</code>:</p>
+  <pre><code class="language-javascript">window.Anim233;  // The singleton
+window.anim233;  // Lowercase alias</code></pre>
+
+  <div class="footer">Anim233 &copy; 2025 &middot; <a href="https://github.com/neko233-com/anim233-ts">GitHub</a></div>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="js/demos.js"></script>
+</body>
+</html>

@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SVG Animation - Anim233</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+</head>
+<body>
+
+<div class="mobile-header"><button class="hamburger">&#9776;</button><h1>Anim233</h1></div>
+<div class="sidebar-overlay"></div>
+<aside class="sidebar">
+  <div class="sidebar-brand"><h1>Anim233</h1><span class="version">v1.0.0</span></div>
+  <nav>
+    <div class="nav-section">Getting Started</div>
+    <a href="index.html">Home</a>
+    <a href="getting-started.html">Installation</a>
+    <div class="nav-section">Core APIs</div>
+    <a href="tween.html">Tween (DOTween)</a>
+    <a href="animation.html">Animate (anime.js)</a>
+    <a href="timeline.html">Timeline</a>
+    <a href="easings.html">Easings</a>
+    <div class="nav-section">Advanced</div>
+    <a href="shader.html">Shader (WebGL)</a>
+    <a href="draggable.html">Draggable</a>
+    <a href="scroll.html">Scroll</a>
+    <a href="text.html">Text Effects</a>
+    <a href="svg.html">SVG Animation</a>
+    <div class="nav-section">Reference</div>
+    <a href="utilities.html">Utilities</a>
+    <a href="api-reference.html">API Reference</a>
+  </nav>
+</aside>
+
+<main class="main">
+  <h1>SVG Animation</h1>
+  <p>While Anim233 does not have a dedicated SVG module, you can animate SVG elements using the core <code>animate()</code> and <code>tween()</code> APIs. SVG properties like <code>stroke-dashoffset</code>, <code>opacity</code>, <code>transform</code>, and CSS properties are all animatable.</p>
+
+  <h2>SVG + Animate API</h2>
+  <p>Anim233 treats SVG elements like any other DOM element. Use CSS properties and SVG attributes to drive animations.</p>
+
+  <h2>Common SVG Animation Patterns</h2>
+
+  <h3>Stroke Dash Animation (Draw Path)</h3>
+  <div class="demo-box">
+    <div class="demo-title">Live Demo &mdash; Draw SVG Path</div>
+    <div class="demo-area" style="text-align:center;">
+      <svg id="svg-draw" width="300" height="120" viewBox="0 0 300 120" style="overflow:visible;">
+        <path id="svg-path1" d="M10,60 C50,10 100,110 150,60 C200,10 250,110 290,60" fill="none" stroke="url(#svgGrad1)" stroke-width="3" stroke-linecap="round"/>
+        <defs>
+          <linearGradient id="svgGrad1" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#6c63ff"/>
+            <stop offset="100%" stop-color="#ff6584"/>
+          </linearGradient>
+        </defs>
+      </svg>
+      <br>
+      <button class="demo-btn mt-1" onclick="svgDrawDemo()">Draw Path</button>
+    </div>
+  </div>
+  <pre><code class="language-javascript">const path = document.querySelector('#my-path');
+const length = path.getTotalLength();
+path.style.strokeDasharray = length;
+path.style.strokeDashoffset = length;
+
+Anim233.animate({
+  targets: path,
+  strokeDashoffset: 0,
+  duration: 2000,
+  ease: 'easeInOutCubic'
+});</code></pre>
+
+  <h3>SVG Circle Morph</h3>
+  <div class="demo-box">
+    <div class="demo-title">Live Demo &mdash; Pulsing circles</div>
+    <div class="demo-area" style="text-align:center;">
+      <svg id="svg-circles" width="300" height="120" viewBox="0 0 300 120">
+        <circle class="svg-circle" cx="60" cy="60" r="20" fill="none" stroke="#6c63ff" stroke-width="2" opacity="0.8"/>
+        <circle class="svg-circle" cx="150" cy="60" r="20" fill="none" stroke="#8b5cf6" stroke-width="2" opacity="0.8"/>
+        <circle class="svg-circle" cx="240" cy="60" r="20" fill="none" stroke="#ff6584" stroke-width="2" opacity="0.8"/>
+      </svg>
+      <br>
+      <button class="demo-btn mt-1" onclick="svgCircleDemo()">Pulse</button>
+    </div>
+  </div>
+
+  <h3>SVG Rotate</h3>
+  <div class="demo-box">
+    <div class="demo-title">Live Demo &mdash; Rotating star</div>
+    <div class="demo-area" style="text-align:center;">
+      <svg width="200" height="200" viewBox="0 0 200 200">
+        <g id="svg-star" transform-origin="100 100">
+          <polygon points="100,20 120,80 185,80 132,120 150,180 100,145 50,180 68,120 15,80 80,80" fill="none" stroke="url(#svgGrad2)" stroke-width="2"/>
+          <defs>
+            <linearGradient id="svgGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#6c63ff"/>
+              <stop offset="100%" stop-color="#ff6584"/>
+            </linearGradient>
+          </defs>
+        </g>
+      </svg>
+      <br>
+      <button class="demo-btn mt-1" onclick="svgRotateDemo()">Rotate</button>
+    </div>
+  </div>
+
+  <h3>SVG Stagger</h3>
+  <div class="demo-box">
+    <div class="demo-title">Live Demo &mdash; Staggered dots</div>
+    <div class="demo-area" style="text-align:center;">
+      <svg id="svg-dots" width="400" height="80" viewBox="0 0 400 80"></svg>
+      <br>
+      <button class="demo-btn mt-1" onclick="svgStaggerDemo()">Animate</button>
+    </div>
+  </div>
+
+  <h3>SVG Scale Bounce</h3>
+  <div class="demo-box">
+    <div class="demo-title">Live Demo &mdash; Bouncing squares</div>
+    <div class="demo-area" style="text-align:center;">
+      <svg width="300" height="100" viewBox="0 0 300 100">
+        <rect class="svg-rect" x="30" y="25" width="50" height="50" rx="8" fill="none" stroke="#6c63ff" stroke-width="2"/>
+        <rect class="svg-rect" x="125" y="25" width="50" height="50" rx="8" fill="none" stroke="#8b5cf6" stroke-width="2"/>
+        <rect class="svg-rect" x="220" y="25" width="50" height="50" rx="8" fill="none" stroke="#ff6584" stroke-width="2"/>
+      </svg>
+      <br>
+      <button class="demo-btn mt-1" onclick="svgBounceDemo()">Bounce</button>
+    </div>
+  </div>
+
+  <h2>Tips</h2>
+  <div class="note">
+    Use <code>getTotalLength()</code> on SVG paths to calculate stroke-dasharray for draw animations. For transforms, prefer CSS transforms (<code>transform: rotate(...)</code>) over SVG <code>transform</code> attributes for better compatibility with Anim233.
+  </div>
+
+  <div class="footer">Anim233 &copy; 2025 &middot; <a href="https://github.com/neko233-com/anim233-ts">GitHub</a></div>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="js/demos.js"></script>
+<script>
+function svgDrawDemo() {
+  animReady(A => {
+    const path = document.getElementById('svg-path1');
+    const len = path.getTotalLength();
+    path.style.strokeDasharray = len;
+    path.style.strokeDashoffset = len;
+    A.animate({
+      targets: path,
+      strokeDashoffset: 0,
+      duration: 2000,
+      ease: 'easeInOutCubic'
+    });
+  });
+}
+
+function svgCircleDemo() {
+  animReady(A => {
+    const circles = document.querySelectorAll('#svg-circles .svg-circle');
+    A.animate({
+      targets: circles,
+      r: [20, 35, 20],
+      strokeWidth: [2, 4, 2],
+      opacity: [0.8, 1, 0.8],
+      duration: 800,
+      ease: 'easeInOutCubic',
+      loop: 3,
+      alternate: true,
+      delay: A.stagger(150)
+    });
+  });
+}
+
+function svgRotateDemo() {
+  animReady(A => {
+    const star = document.getElementById('svg-star');
+    star.style.transformOrigin = '100px 100px';
+    A.animate({
+      targets: star,
+      rotate: [0, 360],
+      duration: 1500,
+      ease: 'easeInOutCubic',
+      loop: 2
+    });
+  });
+}
+
+function svgStaggerDemo() {
+  animReady(A => {
+    const svg = document.getElementById('svg-dots');
+    svg.innerHTML = '';
+    for (let i = 0; i < 16; i++) {
+      const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      circle.setAttribute('cx', 20 + i * 24);
+      circle.setAttribute('cy', 40);
+      circle.setAttribute('r', 8);
+      circle.setAttribute('fill', 'none');
+      circle.setAttribute('stroke', '#6c63ff');
+      circle.setAttribute('stroke-width', '2');
+      circle.style.transformOrigin = `${20 + i * 24}px 40px`;
+      svg.appendChild(circle);
+    }
+    const circles = svg.querySelectorAll('circle');
+    A.animate({
+      targets: circles,
+      r: [8, 14, 8],
+      strokeWidth: [2, 3, 2],
+      duration: 600,
+      ease: 'easeOutBack',
+      delay: A.stagger(60)
+    });
+  });
+}
+
+function svgBounceDemo() {
+  animReady(A => {
+    const rects = document.querySelectorAll('.svg-rect');
+    rects.forEach(r => { r.style.transformOrigin = 'center'; });
+    A.animate({
+      targets: rects,
+      scale: [1, 1.3, 1],
+      duration: 500,
+      ease: 'easeOutBack',
+      delay: A.stagger(150),
+      loop: 2,
+      alternate: true
+    });
+  });
+}
+</script>
+</body>
+</html>

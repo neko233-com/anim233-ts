@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Animate API - Anim233</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+</head>
+<body>
+
+<div class="mobile-header"><button class="hamburger">&#9776;</button><h1>Anim233</h1></div>
+<div class="sidebar-overlay"></div>
+<aside class="sidebar">
+  <div class="sidebar-brand"><h1>Anim233</h1><span class="version">v1.0.0</span></div>
+  <nav>
+    <div class="nav-section">Getting Started</div>
+    <a href="index.html">Home</a>
+    <a href="getting-started.html">Installation</a>
+    <div class="nav-section">Core APIs</div>
+    <a href="tween.html">Tween (DOTween)</a>
+    <a href="animation.html">Animate (anime.js)</a>
+    <a href="timeline.html">Timeline</a>
+    <a href="easings.html">Easings</a>
+    <div class="nav-section">Advanced</div>
+    <a href="shader.html">Shader (WebGL)</a>
+    <a href="draggable.html">Draggable</a>
+    <a href="scroll.html">Scroll</a>
+    <a href="text.html">Text Effects</a>
+    <a href="svg.html">SVG Animation</a>
+    <div class="nav-section">Reference</div>
+    <a href="utilities.html">Utilities</a>
+    <a href="api-reference.html">API Reference</a>
+  </nav>
+</aside>
+
+<main class="main">
+  <h1>Animate API <span class="badge badge-green" style="font-size:0.5em;vertical-align:middle;">anime.js-style</span></h1>
+  <p>Declarative, single-call animation via <code>Anim233.animate()</code>. Configure targets, properties, timing, and callbacks in one object.</p>
+
+  <h2>Usage</h2>
+  <pre><code class="language-javascript">Anim233.animate({
+  targets: '#box',
+  x: 200,
+  rotate: 360,
+  duration: 1000,
+  ease: 'easeOutCubic',
+  autoplay: true,
+  loop: 3,
+  alternate: true,
+  onUpdate: (anim) => console.log(anim.progress),
+  onComplete: () => console.log('done')
+});</code></pre>
+
+  <h2>Options</h2>
+  <table class="api-table">
+    <thead><tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><code>targets</code></td><td>string | HTMLElement | HTMLElement[] | NodeList</td><td>''</td><td>CSS selector, element, or collection</td></tr>
+      <tr><td><code>duration</code></td><td>number</td><td>1000</td><td>Duration in ms</td></tr>
+      <tr><td><code>delay</code></td><td>number | (el,i,l) =&gt; number</td><td>0</td><td>Delay before start (supports per-element)</td></tr>
+      <tr><td><code>ease</code></td><td>EasingName | EasingFunction</td><td>'easeOutCubic'</td><td>Easing function</td></tr>
+      <tr><td><code>loop</code></td><td>number | boolean</td><td>1</td><td>true = infinite, or N times</td></tr>
+      <tr><td><code>loopDelay</code></td><td>number</td><td>0</td><td>Delay between loops</td></tr>
+      <tr><td><code>alternate</code></td><td>boolean</td><td>false</td><td>Reverse direction on each loop</td></tr>
+      <tr><td><code>reversed</code></td><td>boolean</td><td>false</td><td>Start in reversed direction</td></tr>
+      <tr><td><code>autoplay</code></td><td>boolean</td><td>true</td><td>Auto-start after creation</td></tr>
+      <tr><td><code>playbackRate</code></td><td>number</td><td>1</td><td>Speed multiplier</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Properties (animate values)</h2>
+  <p>Any CSS property can be animated. Use numbers for CSS pixel values, or string values for other CSS properties.</p>
+  <table class="api-table">
+    <thead><tr><th>Property</th><th>Type</th><th>Example</th></tr></thead>
+    <tbody>
+      <tr><td><code>x</code></td><td>number</td><td>translates to <code>translateX</code></td></tr>
+      <tr><td><code>y</code></td><td>number</td><td>translates to <code>translateY</code></td></tr>
+      <tr><td><code>rotate</code></td><td>number</td><td>degrees of rotation</td></tr>
+      <tr><td><code>scale</code></td><td>number</td><td>scale factor</td></tr>
+      <tr><td><code>opacity</code></td><td>number</td><td>0..1 opacity value</td></tr>
+      <tr><td><code>width</code></td><td>number</td><td>pixel width</td></tr>
+      <tr><td><code>height</code></td><td>number</td><td>pixel height</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Callbacks</h2>
+  <table class="api-table">
+    <thead><tr><th>Callback</th><th>Signature</th><th>When</th></tr></thead>
+    <tbody>
+      <tr><td><code>onBegin</code></td><td>(anim) =&gt; void</td><td>Animation starts</td></tr>
+      <tr><td><code>onComplete</code></td><td>(anim) =&gt; void</td><td>Animation completes</td></tr>
+      <tr><td><code>onUpdate</code></td><td>(anim) =&gt; void</td><td>Each frame</td></tr>
+      <tr><td><code>onRender</code></td><td>(anim) =&gt; void</td><td>Each render frame</td></tr>
+      <tr><td><code>onLoop</code></td><td>(anim) =&gt; void</td><td>Each loop restart</td></tr>
+      <tr><td><code>onPause</code></td><td>(anim) =&gt; void</td><td>Animation paused</td></tr>
+      <tr><td><code>onBeforeUpdate</code></td><td>(anim) =&gt; void</td><td>Before property update</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Instance Methods</h2>
+  <table class="api-table">
+    <thead><tr><th>Method</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><code>.play()</code></td><td>Start/resume animation</td></tr>
+      <tr><td><code>.pause()</code></td><td>Pause animation</td></tr>
+      <tr><td><code>.restart()</code></td><td>Reset and play</td></tr>
+      <tr><td><code>.reverse()</code></td><td>Toggle reversed direction</td></tr>
+      <tr><td><code>.alternate()</code></td><td>Toggle alternate mode</td></tr>
+      <tr><td><code>.resume()</code></td><td>Resume if paused</td></tr>
+      <tr><td><code>.complete()</code></td><td>Jump to end</td></tr>
+      <tr><td><code>.cancel()</code></td><td>Stop without completing</td></tr>
+      <tr><td><code>.revert()</code></td><td>Remove all inline styles</td></tr>
+      <tr><td><code>.reset()</code></td><td>Reset to initial state</td></tr>
+      <tr><td><code>.seek(time)</code></td><td>Seek to absolute time</td></tr>
+      <tr><td><code>.stretch(dur)</code></td><td>Change duration</td></tr>
+      <tr><td><code>.then(cb)</code></td><td>Promise-based completion</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Instance Properties</h2>
+  <table class="api-table">
+    <thead><tr><th>Property</th><th>Type</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><code>finished</code></td><td>Promise</td><td>Resolves when complete</td></tr>
+      <tr><td><code>currentTime</code></td><td>number</td><td>Current time in ms</td></tr>
+      <tr><td><code>progress</code></td><td>number</td><td>0..1 progress</td></tr>
+      <tr><td><code>duration</code></td><td>number</td><td>Total duration</td></tr>
+      <tr><td><code>paused</code></td><td>boolean</td><td>Paused state</td></tr>
+      <tr><td><code>reversed</code></td><td>boolean</td><td>Reversed state</td></tr>
+      <tr><td><code>began</code></td><td>boolean</td><td>Has started</td></tr>
+      <tr><td><code>completed</code></td><td>boolean</td><td>Has completed</td></tr>
+    </tbody>
+  </table>
+
+  <hr>
+
+  <h2>Demos</h2>
+
+  <h3>Basic Animate</h3>
+  <div class="demo-box">
+    <div class="demo-title">Live Demo</div>
+    <div class="demo-area">
+      <div class="anim-box" id="an-basic" style="margin-bottom:10px;"></div>
+      <button class="demo-btn" onclick="anBasicDemo()">Animate</button>
+    </div>
+  </div>
+  <pre><code class="language-javascript">Anim233.animate({
+  targets: '#box',
+  x: 250,
+  rotate: 720,
+  scale: 1.5,
+  duration: 1200,
+  ease: 'easeOutElastic',
+  alternate: true,
+  loop: 2
+});</code></pre>
+
+  <h3>Loop &amp; Alternate</h3>
+  <div class="demo-box">
+    <div class="demo-title">Live Demo &mdash; Loop 3 times with alternate</div>
+    <div class="demo-area">
+      <div class="anim-box" id="an-loop" style="margin-bottom:10px;"></div>
+      <button class="demo-btn" onclick="anLoopDemo()">Animate</button>
+    </div>
+  </div>
+  <pre><code class="language-javascript">Anim233.animate({
+  targets: '#box',
+  x: [0, 300],
+  scale: [1, 1.5],
+  duration: 800,
+  ease: 'easeInOutCubic',
+  loop: 3,
+  alternate: true
+});</code></pre>
+
+  <h3>Stagger Animation</h3>
+  <div class="demo-box">
+    <div class="demo-title">Live Demo &mdash; Staggered cards</div>
+    <div class="demo-area">
+      <div class="flex gap-1" id="an-stagger-boxes" style="margin-bottom:10px; flex-wrap:wrap;">
+        <div class="anim-box" id="as1"></div>
+        <div class="anim-box" id="as2"></div>
+        <div class="anim-box" id="as3"></div>
+        <div class="anim-box" id="as4"></div>
+        <div class="anim-box" id="as5"></div>
+      </div>
+      <button class="demo-btn" onclick="anStaggerDemo()">Stagger</button>
+    </div>
+  </div>
+  <pre><code class="language-javascript">Anim233.animate({
+  targets: '.box',
+  y: [100, 0],
+  opacity: [0, 1],
+  scale: [0.5, 1],
+  duration: 600,
+  ease: 'easeOutBack',
+  delay: Anim233.stagger(100)
+});</code></pre>
+
+  <h3>Promise-based (async/await)</h3>
+  <div class="demo-box">
+    <div class="demo-title">Live Demo</div>
+    <div class="demo-area">
+      <div class="anim-box" id="an-promise" style="margin-bottom:10px;"></div>
+      <div id="an-promise-status" style="font-family:'JetBrains Mono',monospace;font-size:0.8rem;color:var(--text-dim);">Ready</div>
+      <button class="demo-btn" onclick="anPromiseDemo()">Run Async</button>
+    </div>
+  </div>
+  <pre><code class="language-javascript">async function animateInSequence() {
+  await Anim233.animate({ targets: '#a', x: 200, duration: 500 }).finished;
+  await Anim233.animate({ targets: '#a', y: -100, duration: 500 }).finished;
+  await Anim233.animate({ targets: '#a', x: 0, y: 0, duration: 500 }).finished;
+  console.log('All done!');
+}</code></pre>
+
+  <h3>Playback Controls</h3>
+  <div class="demo-box">
+    <div class="demo-title">Live Demo</div>
+    <div class="demo-area">
+      <div class="anim-box" id="an-playback" style="margin-bottom:10px;"></div>
+      <button class="demo-btn" onclick="anPlaybackPlay()">Play</button>
+      <button class="demo-btn secondary" onclick="anPlaybackPause()">Pause</button>
+      <button class="demo-btn secondary" onclick="anPlaybackRestart()">Restart</button>
+      <button class="demo-btn secondary" onclick="anPlaybackReverse()">Reverse</button>
+    </div>
+  </div>
+
+  <div class="footer">Anim233 &copy; 2025 &middot; <a href="https://github.com/neko233-com/anim233-ts">GitHub</a></div>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="js/demos.js"></script>
+<script>
+let anPlaybackInstance = null;
+function resetAnimBox(id) { const el = document.getElementById(id); el.style.transform = 'translate(0,0) rotate(0deg) scale(1)'; el.style.opacity = '1'; return el; }
+function anBasicDemo() {
+  animReady(A => {
+    resetAnimBox('an-basic');
+    A.animate({
+      targets: '#an-basic',
+      x: 250, rotate: 720, scale: 1.5,
+      duration: 1200, ease: 'easeOutBack',
+      alternate: true, loop: 2
+    });
+  });
+}
+function anLoopDemo() {
+  animReady(A => {
+    resetAnimBox('an-loop');
+    A.animate({
+      targets: '#an-loop',
+      x: [0, 300], scale: [1, 1.5],
+      duration: 800, ease: 'easeInOutCubic',
+      loop: 3, alternate: true
+    });
+  });
+}
+function anStaggerDemo() {
+  animReady(A => {
+    ['as1','as2','as3','as4','as5'].forEach(id => {
+      const el = document.getElementById(id);
+      el.style.transform = 'translateY(80px) scale(0.5)';
+      el.style.opacity = '0';
+    });
+    A.animate({
+      targets: ['#as1','#as2','#as3','#as4','#as5'],
+      y: [80, 0], opacity: [0, 1], scale: [0.5, 1],
+      duration: 600, ease: 'easeOutBack',
+      delay: A.stagger(100)
+    });
+  });
+}
+function anPromiseDemo() {
+  animReady(A => {
+    const el = resetAnimBox('an-promise');
+    const status = document.getElementById('an-promise-status');
+    status.textContent = 'Step 1: Moving right...';
+    A.animate({ targets: el, x: 200, duration: 500, ease: 'easeOutCubic' }).finished.then(() => {
+      status.textContent = 'Step 2: Moving up...';
+      return A.animate({ targets: el, y: -80, duration: 500, ease: 'easeOutCubic' }).finished;
+    }).then(() => {
+      status.textContent = 'Step 3: Returning...';
+      return A.animate({ targets: el, x: 0, y: 0, duration: 500, ease: 'easeInOutQuad' }).finished;
+    }).then(() => {
+      status.textContent = 'All done!';
+    });
+  });
+}
+function anPlaybackPlay() {
+  animReady(A => {
+    resetAnimBox('an-playback');
+    anPlaybackInstance = A.animate({
+      targets: '#an-playback',
+      x: [0, 300, 0], rotate: [0, 360, 720],
+      duration: 2000, ease: 'easeInOutCubic', autoplay: false
+    });
+    anPlaybackInstance.play();
+  });
+}
+function anPlaybackPause() { if (anPlaybackInstance) anPlaybackInstance.pause(); }
+function anPlaybackRestart() { if (anPlaybackInstance) anPlaybackInstance.restart(); }
+function anPlaybackReverse() { if (anPlaybackInstance) anPlaybackInstance.reverse(); }
+</script>
+</body>
+</html>

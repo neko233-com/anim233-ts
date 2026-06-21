@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Text Effects - Anim233</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+</head>
+<body>
+
+<div class="mobile-header"><button class="hamburger">&#9776;</button><h1>Anim233</h1></div>
+<div class="sidebar-overlay"></div>
+<aside class="sidebar">
+  <div class="sidebar-brand"><h1>Anim233</h1><span class="version">v1.0.0</span></div>
+  <nav>
+    <div class="nav-section">Getting Started</div>
+    <a href="index.html">Home</a>
+    <a href="getting-started.html">Installation</a>
+    <div class="nav-section">Core APIs</div>
+    <a href="tween.html">Tween (DOTween)</a>
+    <a href="animation.html">Animate (anime.js)</a>
+    <a href="timeline.html">Timeline</a>
+    <a href="easings.html">Easings</a>
+    <div class="nav-section">Advanced</div>
+    <a href="shader.html">Shader (WebGL)</a>
+    <a href="draggable.html">Draggable</a>
+    <a href="scroll.html">Scroll</a>
+    <a href="text.html">Text Effects</a>
+    <a href="svg.html">SVG Animation</a>
+    <div class="nav-section">Reference</div>
+    <a href="utilities.html">Utilities</a>
+    <a href="api-reference.html">API Reference</a>
+  </nav>
+</aside>
+
+<main class="main">
+  <h1>Text Effects <span class="badge badge-primary" style="font-size:0.5em;vertical-align:middle;">SplitText</span></h1>
+  <p>Split text into individual characters for scramble, reveal, and stagger effects.</p>
+
+  <h2>Usage</h2>
+  <pre><code class="language-javascript">const splitter = Anim233.splitText('#heading', {
+  chars: true,
+  words: false,
+  lines: false,
+  accessible: true
+});
+
+// Each char is now a &lt;span&gt; in the DOM
+console.log(splitter.chars); // HTMLElement[]</code></pre>
+
+  <h2>Options</h2>
+  <table class="api-table">
+    <thead><tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><code>chars</code></td><td>boolean</td><td>false</td><td>Split by characters</td></tr>
+      <tr><td><code>words</code></td><td>boolean</td><td>false</td><td>Split by words</td></tr>
+      <tr><td><code>lines</code></td><td>boolean</td><td>false</td><td>Split by lines</td></tr>
+      <tr><td><code>accessible</code></td><td>boolean</td><td>false</td><td>Add accessible markup</td></tr>
+      <tr><td><code>includeSpaces</code></td><td>boolean</td><td>false</td><td>Include spaces as chars</td></tr>
+      <tr><td><code>debug</code></td><td>boolean</td><td>false</td><td>Debug mode</td></tr>
+      <tr><td><code>class</code></td><td>string</td><td>''</td><td>CSS class for spans</td></tr>
+      <tr><td><code>wrap</code></td><td>string</td><td>''</td><td>Wrapper element tag</td></tr>
+      <tr><td><code>clone</code></td><td>boolean</td><td>false</td><td>Clone node instead of modifying</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Methods</h2>
+  <table class="api-table">
+    <thead><tr><th>Method</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><code>.addEffect(fn)</code></td><td>Apply effect function to each char element</td></tr>
+      <tr><td><code>.revert()</code></td><td>Restore original text content</td></tr>
+      <tr><td><code>.refresh()</code></td><td>Re-split text</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Properties</h2>
+  <table class="api-table">
+    <thead><tr><th>Property</th><th>Type</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><code>chars</code></td><td>HTMLElement[]</td><td>Array of character span elements</td></tr>
+      <tr><td><code>words</code></td><td>HTMLElement[]</td><td>Array of word elements (when enabled)</td></tr>
+      <tr><td><code>lines</code></td><td>HTMLElement[]</td><td>Array of line elements (when enabled)</td></tr>
+    </tbody>
+  </table>
+
+  <hr>
+
+  <h2>Demos</h2>
+
+  <h3>Scramble Reveal Effect</h3>
+  <div class="demo-box">
+    <div class="demo-title">Live Demo &mdash; Click to scramble</div>
+    <div class="demo-area">
+      <div class="scramble-target" id="scramble-text">Hello Anim233</div>
+      <button class="demo-btn mt-1" onclick="scrambleDemo()">Scramble Reveal</button>
+    </div>
+  </div>
+  <pre><code class="language-javascript">const text = Anim233.splitText('#heading', { chars: true });
+const chars = '!@#$%^&*()_+-=[]{}|;:,.<>?/~`';
+text.chars.forEach((el, i) => {
+  const original = el.textContent;
+  let count = 0;
+  const interval = setInterval(() => {
+    el.textContent = chars[Math.floor(Math.random() * chars.length)];
+    count++;
+    if (count > 10 + i * 2) {
+      el.textContent = original;
+      clearInterval(interval);
+    }
+  }, 40);
+});</code></pre>
+
+  <h3>Stagger Reveal</h3>
+  <div class="demo-box">
+    <div class="demo-title">Live Demo &mdash; Stagger character reveal</div>
+    <div class="demo-area">
+      <div class="scramble-target" id="stagger-text" style="opacity:0;">Staggered Text</div>
+      <button class="demo-btn mt-1" onclick="staggerTextDemo()">Reveal</button>
+    </div>
+  </div>
+
+  <h3>Wave Effect</h3>
+  <div class="demo-box">
+    <div class="demo-title">Live Demo &mdash; Wave animation on chars</div>
+    <div class="demo-area">
+      <div id="wave-text" style="font-size:2rem;font-weight:800;min-height:3rem;display:flex;align-items:center;justify-content:center;">Wave Effect</div>
+      <button class="demo-btn mt-1" onclick="waveTextDemo()">Animate Wave</button>
+    </div>
+  </div>
+  <pre><code class="language-javascript">const text = Anim233.splitText('#heading', { chars: true });
+const wave = text.chars.map((el, i) => ({
+  targets: el,
+  y: [0, -20, 0],
+  duration: 600,
+  delay: i * 50,
+  ease: 'easeInOutCubic'
+}));
+Anim233.timeline()
+  .add(wave)
+  .play();</code></pre>
+
+  <h3>Fade In Characters</h3>
+  <div class="demo-box">
+    <div class="demo-title">Live Demo</div>
+    <div class="demo-area">
+      <div class="scramble-target" id="fade-text" style="opacity:1;">Fade In Chars</div>
+      <button class="demo-btn mt-1" onclick="fadeTextDemo()">Fade In</button>
+    </div>
+  </div>
+
+  <div class="footer">Anim233 &copy; 2025 &middot; <a href="https://github.com/neko233-com/anim233-ts">GitHub</a></div>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="js/demos.js"></script>
+<script>
+const SCRAMBLE_CHARS = '!@#$%^&*()_+-=[]{}|;:<>?/~';
+
+function scrambleDemo() {
+  animReady(A => {
+    const el = document.getElementById('scramble-text');
+    const original = el.textContent;
+    el.innerHTML = '';
+    const chars = original.split('').map(ch => {
+      const span = document.createElement('span');
+      span.textContent = ch;
+      span.style.display = 'inline-block';
+      el.appendChild(span);
+      return { span, original: ch };
+    });
+    chars.forEach((c, i) => {
+      let count = 0;
+      const max = 12 + i * 2;
+      const iv = setInterval(() => {
+        c.span.textContent = SCRAMBLE_CHARS[Math.floor(Math.random() * SCRAMBLE_CHARS.length)];
+        count++;
+        if (count >= max) {
+          c.span.textContent = c.original;
+          clearInterval(iv);
+        }
+      }, 35 + Math.random() * 20);
+    });
+  });
+}
+
+function staggerTextDemo() {
+  animReady(A => {
+    const el = document.getElementById('stagger-text');
+    el.style.opacity = '0';
+    const original = el.textContent;
+    el.innerHTML = '';
+    const spans = original.split('').map(ch => {
+      const span = document.createElement('span');
+      span.textContent = ch;
+      span.style.display = 'inline-block';
+      span.style.opacity = '0';
+      span.style.transform = 'translateY(20px)';
+      el.appendChild(span);
+      return span;
+    });
+    el.style.opacity = '1';
+    A.animate({
+      targets: spans,
+      y: [20, 0],
+      opacity: [0, 1],
+      duration: 400,
+      ease: 'easeOutBack',
+      delay: A.stagger(50)
+    });
+  });
+}
+
+function waveTextDemo() {
+  animReady(A => {
+    const el = document.getElementById('wave-text');
+    const original = el.textContent;
+    el.innerHTML = '';
+    const spans = original.split('').map(ch => {
+      const span = document.createElement('span');
+      span.textContent = ch === ' ' ? '\u00A0' : ch;
+      span.style.display = 'inline-block';
+      el.appendChild(span);
+      return span;
+    });
+    const tweens = spans.map((s, i) => ({
+      targets: s,
+      y: [0, -20, 0],
+      duration: 600,
+      delay: i * 50,
+      ease: 'easeInOutCubic'
+    }));
+    const tl = A.timeline();
+    tweens.forEach(t => tl.add(t));
+    tl.play();
+  });
+}
+
+function fadeTextDemo() {
+  animReady(A => {
+    const el = document.getElementById('fade-text');
+    const original = el.textContent;
+    el.innerHTML = '';
+    const spans = original.split('').map(ch => {
+      const span = document.createElement('span');
+      span.textContent = ch;
+      span.style.display = 'inline-block';
+      span.style.opacity = '0';
+      el.appendChild(span);
+      return span;
+    });
+    A.animate({
+      targets: spans,
+      opacity: [0, 1],
+      duration: 300,
+      ease: 'easeOutCubic',
+      delay: A.stagger(40)
+    });
+  });
+}
+</script>
+</body>
+</html>

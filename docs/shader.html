@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shader Animation - Anim233</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.css">
+</head>
+<body>
+
+<div class="mobile-header"><button class="hamburger">&#9776;</button><h1>Anim233</h1></div>
+<div class="sidebar-overlay"></div>
+<aside class="sidebar">
+  <div class="sidebar-brand"><h1>Anim233</h1><span class="version">v1.0.0</span></div>
+  <nav>
+    <div class="nav-section">Getting Started</div>
+    <a href="index.html">Home</a>
+    <a href="getting-started.html">Installation</a>
+    <div class="nav-section">Core APIs</div>
+    <a href="tween.html">Tween (DOTween)</a>
+    <a href="animation.html">Animate (anime.js)</a>
+    <a href="timeline.html">Timeline</a>
+    <a href="easings.html">Easings</a>
+    <div class="nav-section">Advanced</div>
+    <a href="shader.html">Shader (WebGL)</a>
+    <a href="draggable.html">Draggable</a>
+    <a href="scroll.html">Scroll</a>
+    <a href="text.html">Text Effects</a>
+    <a href="svg.html">SVG Animation</a>
+    <div class="nav-section">Reference</div>
+    <a href="utilities.html">Utilities</a>
+    <a href="api-reference.html">API Reference</a>
+  </nav>
+</aside>
+
+<main class="main">
+  <h1>Shader Animation <span class="badge badge-pink" style="font-size:0.5em;vertical-align:middle;">WebGL</span></h1>
+  <p>Create real-time WebGL shader animations with automatic time uniform, custom uniforms, and hot-swap shader editing.</p>
+
+  <h2>Usage</h2>
+  <pre><code class="language-javascript">const shader = Anim233.createShaderAnim233({
+  target: document.getElementById('my-canvas'),
+  fragment: `
+    precision mediump float;
+    uniform float time;
+    uniform vec2 resolution;
+    void main() {
+      vec2 uv = gl_FragCoord.xy / resolution;
+      gl_FragColor = vec4(uv.x, uv.y, sin(time), 1.0);
+    }`,
+  uniforms: {
+    speed: 1.0,
+    color: [1.0, 0.4, 0.6]
+  },
+  autoplay: true
+});</code></pre>
+
+  <h2>Options</h2>
+  <table class="api-table">
+    <thead><tr><th>Option</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><code>target</code></td><td>HTMLCanvasElement</td><td>Yes</td><td>Canvas element to render to</td></tr>
+      <tr><td><code>vertex</code></td><td>string</td><td>No</td><td>Vertex shader GLSL (default provided)</td></tr>
+      <tr><td><code>fragment</code></td><td>string</td><td>No</td><td>Fragment shader GLSL (default gradient)</td></tr>
+      <tr><td><code>uniforms</code></td><td>Record&lt;string, number | number[]&gt;</td><td>No</td><td>Custom uniform values</td></tr>
+      <tr><td><code>autoplay</code></td><td>boolean</td><td>No</td><td>Auto-start rendering (default: true)</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Built-in Uniforms</h2>
+  <table class="api-table">
+    <thead><tr><th>Uniform</th><th>Type</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><code>time</code></td><td>float</td><td>Elapsed time in seconds</td></tr>
+      <tr><td><code>resolution</code></td><td>vec2</td><td>Canvas width and height in pixels</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Methods</h2>
+  <table class="api-table">
+    <thead><tr><th>Method</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><code>.play()</code></td><td>Start rendering</td></tr>
+      <tr><td><code>.pause()</code></td><td>Pause rendering</td></tr>
+      <tr><td><code>.stop()</code></td><td>Stop (alias for pause)</td></tr>
+      <tr><td><code>.setUniform(name, value)</code></td><td>Set custom uniform at runtime</td></tr>
+      <tr><td><code>.setFragmentShader(source)</code></td><td>Hot-swap fragment shader</td></tr>
+      <tr><td><code>.setVertexShader(source)</code></td><td>Hot-swap vertex shader</td></tr>
+      <tr><td><code>.resize(w, h)</code></td><td>Resize canvas</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Uniform Types</h2>
+  <table class="api-table">
+    <thead><tr><th>JS Type</th><th>WebGL Call</th><th>GLSL Type</th></tr></thead>
+    <tbody>
+      <tr><td><code>number</code></td><td>uniform1f</td><td>float</td></tr>
+      <tr><td><code>number[2]</code></td><td>uniform2fv</td><td>vec2</td></tr>
+      <tr><td><code>number[3]</code></td><td>uniform3fv</td><td>vec3</td></tr>
+      <tr><td><code>number[4]</code></td><td>uniform4fv</td><td>vec4</td></tr>
+      <tr><td><code>Float32Array</code></td><td>uniform1fv</td><td>float array</td></tr>
+    </tbody>
+  </table>
+
+  <hr>
+
+  <h2>Preset Shaders</h2>
+
+  <h3>Plasma</h3>
+  <div class="demo-box">
+    <div class="demo-title">Live Demo &mdash; Plasma</div>
+    <div class="demo-area">
+      <canvas id="sh-plasma" class="shader-canvas"></canvas>
+      <button class="demo-btn mt-1" onclick="shaderPlay('plasma')">Play</button>
+      <button class="demo-btn secondary mt-1" onclick="shaderPause('plasma')">Pause</button>
+    </div>
+  </div>
+
+  <h3>Noise</h3>
+  <div class="demo-box">
+    <div class="demo-title">Live Demo &mdash; Perlin Noise</div>
+    <div class="demo-area">
+      <canvas id="sh-noise" class="shader-canvas"></canvas>
+      <button class="demo-btn mt-1" onclick="shaderPlay('noise')">Play</button>
+      <button class="demo-btn secondary mt-1" onclick="shaderPause('noise')">Pause</button>
+    </div>
+  </div>
+
+  <h3>Fractal</h3>
+  <div class="demo-box">
+    <div class="demo-title">Live Demo &mdash; Mandelbrot</div>
+    <div class="demo-area">
+      <canvas id="sh-fractal" class="shader-canvas"></canvas>
+      <button class="demo-btn mt-1" onclick="shaderPlay('fractal')">Play</button>
+      <button class="demo-btn secondary mt-1" onclick="shaderPause('fractal')">Pause</button>
+    </div>
+  </div>
+
+  <hr>
+
+  <h2>Shader Editor</h2>
+  <p class="text-dim text-sm mb-2">Edit the fragment shader code and click Compile to see changes live.</p>
+  <div class="demo-box">
+    <div class="demo-title">Interactive Editor</div>
+    <div class="demo-area">
+      <canvas id="sh-editor-canvas" class="shader-canvas" style="margin-bottom:1rem;"></canvas>
+      <div class="shader-editor">
+        <div>
+          <h4 class="mb-1">Fragment Shader</h4>
+          <textarea id="sh-editor-code">precision mediump float;
+uniform float time;
+uniform vec2 resolution;
+
+void main() {
+  vec2 uv = gl_FragCoord.xy / resolution;
+  float d = length(uv - 0.5);
+  float wave = sin(d * 20.0 - time * 3.0) * 0.5 + 0.5;
+  vec3 col = vec3(
+    wave * uv.x,
+    wave * 0.5,
+    wave * uv.y
+  );
+  gl_FragColor = vec4(col, 1.0);
+}</textarea>
+        </div>
+        <div>
+          <h4 class="mb-1">Controls</h4>
+          <div class="uniform-slider">
+            <label>Speed</label>
+            <input type="range" min="0" max="5" step="0.1" value="1" oninput="shaderUniform('speed', this.value); this.nextElementSibling.textContent=this.value;">
+            <span class="value">1</span>
+          </div>
+          <div class="uniform-slider">
+            <label>Intensity</label>
+            <input type="range" min="0" max="10" step="0.5" value="5" oninput="shaderUniform('intensity', this.value); this.nextElementSibling.textContent=this.value;">
+            <span class="value">5</span>
+          </div>
+          <button class="demo-btn mt-2" onclick="compileShader()">Compile</button>
+          <button class="demo-btn secondary mt-2" onclick="shaderPlay('editor')">Play</button>
+          <button class="demo-btn secondary mt-2" onclick="shaderPause('editor')">Pause</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2>Custom Uniforms</h2>
+  <pre><code class="language-javascript">const shader = Anim233.createShaderAnim233({
+  target: canvas,
+  fragment: `
+    precision mediump float;
+    uniform float time;
+    uniform vec2 resolution;
+    uniform float speed;
+    uniform vec3 color;
+    void main() {
+      vec2 uv = gl_FragCoord.xy / resolution;
+      float wave = sin(uv.x * 10.0 + time * speed) * 0.5 + 0.5;
+      gl_FragColor = vec4(color * wave, 1.0);
+    }`,
+  uniforms: { speed: 2.0, color: [1.0, 0.4, 0.6] }
+});
+
+// Update at runtime
+shader.setUniform('speed', 3.0);
+shader.setUniform('color', [0.2, 0.8, 1.0]);</code></pre>
+
+  <div class="footer">Anim233 &copy; 2025 &middot; <a href="https://github.com/neko233-com/anim233-ts">GitHub</a></div>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-glsl.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
+<script src="js/demos.js"></script>
+<script>
+const shaders = {};
+
+const FRAG_PLASMA = `precision mediump float;
+uniform float time;
+uniform vec2 resolution;
+void main() {
+  vec2 uv = gl_FragCoord.xy / resolution;
+  vec3 col = vec3(0.0);
+  for(float i = 1.0; i < 7.0; i++) {
+    float d = length(uv - 0.5);
+    float a = atan(uv.y - 0.5, uv.x - 0.5) + time * 0.4;
+    d += 0.04 * sin(a * i * 2.0 + time * 1.5);
+    col += smoothstep(0.5, 0.0, d) * (0.35 / i);
+  }
+  col.r *= 0.42 + 0.58 * sin(time * 0.7);
+  col.g *= 0.39 + 0.61 * cos(time * 0.5);
+  col.b *= 0.5 + 0.5 * sin(time * 0.3);
+  gl_FragColor = vec4(col, 1.0);
+}`;
+
+const FRAG_NOISE = `precision mediump float;
+uniform float time;
+uniform vec2 resolution;
+float hash(vec2 p) {
+  return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
+}
+float noise(vec2 p) {
+  vec2 i = floor(p);
+  vec2 f = fract(p);
+  f = f * f * (3.0 - 2.0 * f);
+  float a = hash(i);
+  float b = hash(i + vec2(1.0, 0.0));
+  float c = hash(i + vec2(0.0, 1.0));
+  float d = hash(i + vec2(1.0, 1.0));
+  return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
+}
+float fbm(vec2 p) {
+  float v = 0.0, a = 0.5;
+  for(int i = 0; i < 6; i++) {
+    v += a * noise(p);
+    p *= 2.0;
+    a *= 0.5;
+  }
+  return v;
+}
+void main() {
+  vec2 uv = gl_FragCoord.xy / resolution;
+  vec2 q = uv + time * 0.1;
+  float f = fbm(q * 4.0);
+  vec3 col = mix(vec3(0.1, 0.05, 0.2), vec3(0.4, 0.2, 0.8), f);
+  col = mix(col, vec3(0.9, 0.3, 0.5), f * f * 0.5);
+  gl_FragColor = vec4(col, 1.0);
+}`;
+
+const FRAG_FRACTAL = `precision mediump float;
+uniform float time;
+uniform vec2 resolution;
+void main() {
+  vec2 uv = (gl_FragCoord.xy - resolution * 0.5) / min(resolution.x, resolution.y);
+  uv *= 2.5;
+  uv.x -= 0.5;
+  vec2 c = vec2(-0.745, 0.186) + vec2(sin(time * 0.2) * 0.05, cos(time * 0.15) * 0.05);
+  vec2 z = uv;
+  float iter = 0.0;
+  for(int i = 0; i < 100; i++) {
+    z = vec2(z.x * z.x - z.y * z.y, 2.0 * z.x * z.y) + c;
+    if(dot(z, z) > 4.0) break;
+    iter += 1.0;
+  }
+  float t = iter / 100.0;
+  vec3 col = vec3(
+    0.5 + 0.5 * cos(6.28 * t + time * 0.5),
+    0.5 + 0.5 * cos(6.28 * t + time * 0.3 + 2.0),
+    0.5 + 0.5 * cos(6.28 * t + time * 0.7 + 4.0)
+  );
+  gl_FragColor = vec4(col, 1.0);
+}`;
+
+function initShader(id, fragSrc, uniforms) {
+  animReady(A => {
+    const canvas = document.getElementById(id);
+    if (!canvas) return;
+    shaders[id] = A.createShaderAnim233({
+      target: canvas,
+      fragment: fragSrc,
+      uniforms: uniforms || {}
+    });
+  });
+}
+
+function shaderPlay(id) { if (shaders[id]) shaders[id].play(); }
+function shaderPause(id) { if (shaders[id]) shaders[id].pause(); }
+
+function shaderUniform(name, val) {
+  if (shaders['editor']) shaders['editor'].setUniform(name, parseFloat(val));
+}
+
+function compileShader() {
+  const code = document.getElementById('sh-editor-code').value;
+  if (shaders['editor']) {
+    shaders['editor'].setFragmentShader(code);
+  }
+}
+
+window.addEventListener('load', () => {
+  initShader('sh-plasma', FRAG_PLASMA);
+  initShader('sh-noise', FRAG_NOISE);
+  initShader('sh-fractal', FRAG_FRACTAL);
+  initShader('sh-editor-canvas', document.getElementById('sh-editor-code').value, { speed: 1.0, intensity: 5.0 });
+});
+</script>
+</body>
+</html>

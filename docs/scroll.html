@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scroll Animations - Anim233</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+</head>
+<body>
+
+<div class="mobile-header"><button class="hamburger">&#9776;</button><h1>Anim233</h1></div>
+<div class="sidebar-overlay"></div>
+<aside class="sidebar">
+  <div class="sidebar-brand"><h1>Anim233</h1><span class="version">v1.0.0</span></div>
+  <nav>
+    <div class="nav-section">Getting Started</div>
+    <a href="index.html">Home</a>
+    <a href="getting-started.html">Installation</a>
+    <div class="nav-section">Core APIs</div>
+    <a href="tween.html">Tween (DOTween)</a>
+    <a href="animation.html">Animate (anime.js)</a>
+    <a href="timeline.html">Timeline</a>
+    <a href="easings.html">Easings</a>
+    <div class="nav-section">Advanced</div>
+    <a href="shader.html">Shader (WebGL)</a>
+    <a href="draggable.html">Draggable</a>
+    <a href="scroll.html">Scroll</a>
+    <a href="text.html">Text Effects</a>
+    <a href="svg.html">SVG Animation</a>
+    <div class="nav-section">Reference</div>
+    <a href="utilities.html">Utilities</a>
+    <a href="api-reference.html">API Reference</a>
+  </nav>
+</aside>
+
+<main class="main">
+  <h1>Scroll Animations <span class="badge badge-green" style="font-size:0.5em;vertical-align:middle;">Intersection</span></h1>
+  <p>Trigger animations based on viewport intersection and scroll direction. Link animations for scroll-driven playback.</p>
+
+  <h2>Usage</h2>
+  <pre><code class="language-javascript">const observer = Anim233.onScroll({
+  target: '#my-element',
+  container: '#scroll-container',
+  threshold: 0.5,
+  onEnter: (entry) => console.log('entered viewport'),
+  onLeave: (entry) => console.log('left viewport'),
+  onEnterForward: (entry) => console.log('scrolling down, entering'),
+  onEnterBackward: (entry) => console.log('scrolling up, entering')
+});</code></pre>
+
+  <h2>Options</h2>
+  <table class="api-table">
+    <thead><tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><code>container</code></td><td>string | HTMLElement</td><td>window</td><td>Scroll container</td></tr>
+      <tr><td><code>target</code></td><td>string | HTMLElement</td><td>''</td><td>Element to observe</td></tr>
+      <tr><td><code>axis</code></td><td>'x' | 'y'</td><td>'y'</td><td>Scroll axis</td></tr>
+      <tr><td><code>threshold</code></td><td>number | [number, number] | string</td><td>0</td><td>Intersection threshold</td></tr>
+      <tr><td><code>repeat</code></td><td>boolean</td><td>false</td><td>Re-trigger on re-enter</td></tr>
+      <tr><td><code>debug</code></td><td>boolean</td><td>false</td><td>Debug mode</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Callbacks</h2>
+  <table class="api-table">
+    <thead><tr><th>Callback</th><th>Signature</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><code>onEnter</code></td><td>(entry) =&gt; void</td><td>Element enters viewport</td></tr>
+      <tr><td><code>onEnterForward</code></td><td>(entry) =&gt; void</td><td>Entering while scrolling forward (down)</td></tr>
+      <tr><td><code>onEnterBackward</code></td><td>(entry) =&gt; void</td><td>Entering while scrolling backward (up)</td></tr>
+      <tr><td><code>onLeave</code></td><td>(entry) =&gt; void</td><td>Element leaves viewport</td></tr>
+      <tr><td><code>onLeaveForward</code></td><td>(entry) =&gt; void</td><td>Leaving while scrolling forward</td></tr>
+      <tr><td><code>onLeaveBackward</code></td><td>(entry) =&gt; void</td><td>Leaving while scrolling backward</td></tr>
+      <tr><td><code>onUpdate</code></td><td>(entry) =&gt; void</td><td>Continuous update while in view</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Methods</h2>
+  <table class="api-table">
+    <thead><tr><th>Method</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><code>.link(animations)</code></td><td>Link AnimationInstance(s) for scroll-driven playback</td></tr>
+      <tr><td><code>.refresh()</code></td><td>Refresh observer state</td></tr>
+      <tr><td><code>.revert()</code></td><td>Revert observer</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Properties</h2>
+  <table class="api-table">
+    <thead><tr><th>Property</th><th>Type</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><code>linked</code></td><td>AnimationInstance[]</td><td>Array of linked animations (read-only)</td></tr>
+    </tbody>
+  </table>
+
+  <hr>
+
+  <h2>Demo</h2>
+
+  <div class="demo-box">
+    <div class="demo-title">Scroll Demo &mdash; Scroll down to trigger animations</div>
+    <div class="demo-area" id="scroll-demo-area" style="height:400px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--radius);position:relative;">
+      <div style="height:200px;display:flex;align-items:center;justify-content:center;color:var(--text-dim);">Scroll down &darr;</div>
+      <div class="scroll-section" id="scroll-box1" style="background:rgba(108,99,255,0.05);">Section 1 &mdash; Fade in from left</div>
+      <div class="scroll-section" id="scroll-box2" style="background:rgba(255,101,132,0.05);">Section 2 &mdash; Fade in from right</div>
+      <div class="scroll-section" id="scroll-box3" style="background:rgba(74,222,128,0.05);">Section 3 &mdash; Scale up</div>
+      <div class="scroll-section" id="scroll-box4" style="background:rgba(250,204,21,0.05);">Section 4 &mdash; Rotate in</div>
+      <div style="height:100px;display:flex;align-items:center;justify-content:center;color:var(--text-dim);">End of scroll area</div>
+    </div>
+  </div>
+
+  <script>
+  (function() {
+    const area = document.getElementById('scroll-demo-area');
+    const boxes = [
+      { el: document.getElementById('scroll-box1'), triggered: false, from: 'left' },
+      { el: document.getElementById('scroll-box2'), triggered: false, from: 'right' },
+      { el: document.getElementById('scroll-box3'), triggered: false, from: 'scale' },
+      { el: document.getElementById('scroll-box4'), triggered: false, from: 'rotate' }
+    ];
+
+    boxes.forEach(b => {
+      b.el.style.opacity = '0';
+      b.el.style.transition = 'none';
+    });
+
+    area.addEventListener('scroll', function() {
+      const rect = area.getBoundingClientRect();
+      const areaTop = area.scrollTop;
+      const areaHeight = area.clientHeight;
+
+      boxes.forEach(b => {
+        if (b.triggered) return;
+        const bRect = b.el.getBoundingClientRect();
+        const bTop = bRect.top - rect.top;
+        if (bTop < areaHeight * 0.85) {
+          b.triggered = true;
+          b.el.style.transition = 'all 0.8s cubic-bezier(0.16, 1, 0.3, 1)';
+          b.el.style.opacity = '1';
+          if (b.from === 'left') b.el.style.transform = 'translateX(-50px)';
+          if (b.from === 'right') b.el.style.transform = 'translateX(50px)';
+          if (b.from === 'scale') b.el.style.transform = 'scale(0.8)';
+          if (b.from === 'rotate') b.el.style.transform = 'rotate(-5deg)';
+          requestAnimationFrame(() => {
+            b.el.style.transform = 'translateX(0) scale(1) rotate(0)';
+          });
+        }
+      });
+    });
+  })();
+  </script>
+
+  <pre><code class="language-javascript">const observer = Anim233.onScroll({
+  target: '#box',
+  threshold: 0.5,
+  onEnter: () => {
+    Anim233.animate({
+      targets: '#box',
+      x: [50, 0],
+      opacity: [0, 1],
+      duration: 800,
+      ease: 'easeOutCubic'
+    });
+  }
+});</code></pre>
+
+  <h3>Link Animations to Scroll</h3>
+  <pre><code class="language-javascript">const anim = Anim233.animate({
+  targets: '#box',
+  x: 300,
+  rotate: 360,
+  duration: 1000,
+  autoplay: false
+});
+
+const observer = Anim233.onScroll({
+  target: '#box'
+});
+observer.link(anim);</code></pre>
+
+  <div class="note">
+    <strong>Note:</strong> The ScrollObserver API provides the interface above. For scroll-driven animations in production, you can combine it with the linked animation pattern or use the native IntersectionObserver alongside Anim233's animate API.
+  </div>
+
+  <div class="footer">Anim233 &copy; 2025 &middot; <a href="https://github.com/neko233-com/anim233-ts">GitHub</a></div>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="js/demos.js"></script>
+</body>
+</html>

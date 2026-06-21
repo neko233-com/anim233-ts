@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Draggable - Anim233</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+</head>
+<body>
+
+<div class="mobile-header"><button class="hamburger">&#9776;</button><h1>Anim233</h1></div>
+<div class="sidebar-overlay"></div>
+<aside class="sidebar">
+  <div class="sidebar-brand"><h1>Anim233</h1><span class="version">v1.0.0</span></div>
+  <nav>
+    <div class="nav-section">Getting Started</div>
+    <a href="index.html">Home</a>
+    <a href="getting-started.html">Installation</a>
+    <div class="nav-section">Core APIs</div>
+    <a href="tween.html">Tween (DOTween)</a>
+    <a href="animation.html">Animate (anime.js)</a>
+    <a href="timeline.html">Timeline</a>
+    <a href="easings.html">Easings</a>
+    <div class="nav-section">Advanced</div>
+    <a href="shader.html">Shader (WebGL)</a>
+    <a href="draggable.html">Draggable</a>
+    <a href="scroll.html">Scroll</a>
+    <a href="text.html">Text Effects</a>
+    <a href="svg.html">SVG Animation</a>
+    <div class="nav-section">Reference</div>
+    <a href="utilities.html">Utilities</a>
+    <a href="api-reference.html">API Reference</a>
+  </nav>
+</aside>
+
+<main class="main">
+  <h1>Draggable <span class="badge badge-primary" style="font-size:0.5em;vertical-align:middle;">Interaction</span></h1>
+  <p>Create physics-based drag interactions with spring physics, container confinement, and axis locking.</p>
+
+  <h2>Usage</h2>
+  <pre><code class="language-javascript">const drag = Anim233.draggable('#box', {
+  container: '#area',
+  x: true,
+  y: true,
+  onGrab: () => console.log('grabbed'),
+  onDrag: () => console.log('dragging'),
+  onRelease: () => console.log('released'),
+  onSettle: () => console.log('settled')
+});</code></pre>
+
+  <h2>Options</h2>
+  <table class="api-table">
+    <thead><tr><th>Option</th><th>Type</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><code>trigger</code></td><td>string | HTMLElement</td><td>Drag trigger element (defaults to target)</td></tr>
+      <tr><td><code>container</code></td><td>string | HTMLElement</td><td>Confinement container</td></tr>
+      <tr><td><code>containerPadding</code></td><td>number</td><td>Padding inside container</td></tr>
+      <tr><td><code>containerFriction</code></td><td>number</td><td>Friction at container edges</td></tr>
+      <tr><td><code>releaseContainerFriction</code></td><td>number</td><td>Friction on release</td></tr>
+      <tr><td><code>releaseMass</code></td><td>number</td><td>Physics mass on release</td></tr>
+      <tr><td><code>releaseStiffness</code></td><td>number</td><td>Spring stiffness</td></tr>
+      <tr><td><code>releaseDamping</code></td><td>number</td><td>Spring damping</td></tr>
+      <tr><td><code>velocityMultiplier</code></td><td>number</td><td>Velocity multiplier</td></tr>
+      <tr><td><code>minVelocity</code></td><td>number</td><td>Min velocity threshold</td></tr>
+      <tr><td><code>maxVelocity</code></td><td>number</td><td>Max velocity cap</td></tr>
+      <tr><td><code>releaseEase</code></td><td>EasingName | EasingFunction</td><td>Release easing function</td></tr>
+      <tr><td><code>dragSpeed</code></td><td>number</td><td>Drag speed multiplier</td></tr>
+      <tr><td><code>dragThreshold</code></td><td>number</td><td>Min movement to start drag</td></tr>
+      <tr><td><code>cursor</code></td><td>string</td><td>Custom cursor style</td></tr>
+      <tr><td><code>x</code></td><td>boolean | object</td><td>Enable X axis (or configure snap/modifier/mapTo)</td></tr>
+      <tr><td><code>y</code></td><td>boolean | object</td><td>Enable Y axis (or configure snap/modifier/mapTo)</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Callbacks</h2>
+  <table class="api-table">
+    <thead><tr><th>Callback</th><th>Signature</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><code>onGrab</code></td><td>(e) =&gt; void</td><td>When drag starts</td></tr>
+      <tr><td><code>onDrag</code></td><td>(e) =&gt; void</td><td>During drag movement</td></tr>
+      <tr><td><code>onUpdate</code></td><td>(e) =&gt; void</td><td>Position update</td></tr>
+      <tr><td><code>onRelease</code></td><td>(e) =&gt; void</td><td>When drag ends</td></tr>
+      <tr><td><code>onSnap</code></td><td>(e) =&gt; void</td><td>When snapping</td></tr>
+      <tr><td><code>onSettle</code></td><td>(e) =&gt; void</td><td>When settled (spring complete)</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Methods</h2>
+  <table class="api-table">
+    <thead><tr><th>Method</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><code>.enable()</code></td><td>Enable dragging</td></tr>
+      <tr><td><code>.disable()</code></td><td>Disable dragging</td></tr>
+      <tr><td><code>.setX(value)</code></td><td>Set X position (translateX)</td></tr>
+      <tr><td><code>.setY(value)</code></td><td>Set Y position (translateY)</td></tr>
+      <tr><td><code>.stop()</code></td><td>Stop dragging</td></tr>
+      <tr><td><code>.reset()</code></td><td>Reset to origin</td></tr>
+      <tr><td><code>.revert()</code></td><td>Alias for reset</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Properties</h2>
+  <table class="api-table">
+    <thead><tr><th>Property</th><th>Type</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><code>x</code></td><td>number</td><td>Current X position</td></tr>
+      <tr><td><code>y</code></td><td>number</td><td>Current Y position</td></tr>
+      <tr><td><code>isDragging</code></td><td>boolean</td><td>Whether currently dragging</td></tr>
+    </tbody>
+  </table>
+
+  <hr>
+
+  <h2>Demo</h2>
+
+  <div class="demo-box">
+    <div class="demo-title">Live Demo &mdash; Drag the box</div>
+    <div class="demo-area" id="drag-area" style="position:relative;min-height:300px;background:repeating-linear-gradient(0deg,transparent,transparent 20px,rgba(108,99,255,0.03) 20px,rgba(108,99,255,0.03) 40px),repeating-linear-gradient(90deg,transparent,transparent 20px,rgba(108,99,255,0.03) 20px,rgba(108,99,255,0.03) 40px);overflow:hidden;">
+      <div class="drag-target" id="drag-box1" style="position:absolute;left:50px;top:50px;">Drag me</div>
+      <div id="drag-info" style="position:absolute;bottom:10px;left:10px;font-family:'JetBrains Mono',monospace;font-size:0.75rem;color:var(--text-dim);">x: 0, y: 0</div>
+    </div>
+  </div>
+
+  <div class="note">
+    <strong>Note:</strong> The Draggable API is currently a skeleton implementation. The interactive demo above uses pointer events directly to demonstrate the intended UX pattern.
+  </div>
+
+  <pre><code class="language-javascript">const drag = Anim233.draggable('#box', {
+  container: '#area',
+  x: true,
+  y: true,
+  releaseStiffness: 300,
+  releaseDamping: 20,
+  onGrab: (e) => { box.style.background = 'var(--accent)'; },
+  onRelease: (e) => { box.style.background = ''; },
+  onSettle: (e) => { console.log('settled at', e.x, e.y); }
+});</code></pre>
+
+  <h3>Axis Locking</h3>
+  <pre><code class="language-javascript">// Horizontal only
+Anim233.draggable('#box', { x: true, y: false });
+
+// Vertical only
+Anim233.draggable('#box', { x: false, y: true });
+
+// With snap to grid
+Anim233.draggable('#box', {
+  x: { snap: 50 },
+  y: { snap: 50 }
+});</code></pre>
+
+  <div class="footer">Anim233 &copy; 2025 &middot; <a href="https://github.com/neko233-com/anim233-ts">GitHub</a></div>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="js/demos.js"></script>
+<script>
+(function() {
+  const box = document.getElementById('drag-box1');
+  const area = document.getElementById('drag-area');
+  const info = document.getElementById('drag-info');
+  let isDragging = false, startX, startY, origX, origY;
+  let currentX = 50, currentY = 50;
+
+  box.addEventListener('pointerdown', e => {
+    isDragging = true;
+    box.setPointerCapture(e.pointerId);
+    startX = e.clientX;
+    startY = e.clientY;
+    origX = currentX;
+    origY = currentY;
+    box.style.transition = 'none';
+    box.style.background = 'linear-gradient(135deg, #ff6584, #6c63ff)';
+    e.preventDefault();
+  });
+
+  box.addEventListener('pointermove', e => {
+    if (!isDragging) return;
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+    currentX = Math.max(0, Math.min(area.offsetWidth - box.offsetWidth, origX + dx));
+    currentY = Math.max(0, Math.min(area.offsetHeight - box.offsetHeight, origY + dy));
+    box.style.left = currentX + 'px';
+    box.style.top = currentY + 'px';
+    info.textContent = `x: ${Math.round(currentX)}, y: ${Math.round(currentY)}`;
+  });
+
+  box.addEventListener('pointerup', () => {
+    if (!isDragging) return;
+    isDragging = false;
+    box.style.background = '';
+  });
+})();
+</script>
+</body>
+</html>

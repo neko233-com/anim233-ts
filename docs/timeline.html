@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Timeline API - Anim233</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+</head>
+<body>
+
+<div class="mobile-header"><button class="hamburger">&#9776;</button><h1>Anim233</h1></div>
+<div class="sidebar-overlay"></div>
+<aside class="sidebar">
+  <div class="sidebar-brand"><h1>Anim233</h1><span class="version">v1.0.0</span></div>
+  <nav>
+    <div class="nav-section">Getting Started</div>
+    <a href="index.html">Home</a>
+    <a href="getting-started.html">Installation</a>
+    <div class="nav-section">Core APIs</div>
+    <a href="tween.html">Tween (DOTween)</a>
+    <a href="animation.html">Animate (anime.js)</a>
+    <a href="timeline.html">Timeline</a>
+    <a href="easings.html">Easings</a>
+    <div class="nav-section">Advanced</div>
+    <a href="shader.html">Shader (WebGL)</a>
+    <a href="draggable.html">Draggable</a>
+    <a href="scroll.html">Scroll</a>
+    <a href="text.html">Text Effects</a>
+    <a href="svg.html">SVG Animation</a>
+    <div class="nav-section">Reference</div>
+    <a href="utilities.html">Utilities</a>
+    <a href="api-reference.html">API Reference</a>
+  </nav>
+</aside>
+
+<main class="main">
+  <h1>Timeline API <span class="badge badge-pink" style="font-size:0.5em;vertical-align:middle;">Sequencing</span></h1>
+  <p>Orchestrate multiple animations with precise timing. Add animations at absolute offsets or relative positions.</p>
+
+  <h2>Create a Timeline</h2>
+  <pre><code class="language-javascript">const tl = Anim233.timeline({
+  autoplay: true,
+  delay: 0,
+  loop: false,
+  alternate: false
+});</code></pre>
+
+  <h2>Timeline Options</h2>
+  <table class="api-table">
+    <thead><tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><code>delay</code></td><td>number</td><td>0</td><td>Initial delay in ms</td></tr>
+      <tr><td><code>duration</code></td><td>number</td><td>0</td><td>Total duration (auto-calculated if 0)</td></tr>
+      <tr><td><code>loop</code></td><td>number | boolean</td><td>false</td><td>Loop count or infinite</td></tr>
+      <tr><td><code>alternate</code></td><td>boolean</td><td>false</td><td>Reverse on each loop</td></tr>
+      <tr><td><code>reversed</code></td><td>boolean</td><td>false</td><td>Start reversed</td></tr>
+      <tr><td><code>autoplay</code></td><td>boolean</td><td>true</td><td>Auto-start</td></tr>
+      <tr><td><code>playbackRate</code></td><td>number</td><td>1</td><td>Speed multiplier</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Methods</h2>
+  <table class="api-table">
+    <thead><tr><th>Method</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><code>.add(anim, offset?)</code></td><td>Add AnimationOptions, AnimationInstance, or callback at offset</td></tr>
+      <tr><td><code>.set(props, offset?)</code></td><td>Set properties at offset</td></tr>
+      <tr><td><code>.sync(anim, offset?)</code></td><td>Sync an AnimationInstance at offset</td></tr>
+      <tr><td><code>.call(fn, offset?)</code></td><td>Call function at offset</td></tr>
+      <tr><td><code>.label(name, offset?)</code></td><td>Add named label</td></tr>
+      <tr><td><code>.remove(anim)</code></td><td>Remove an animation</td></tr>
+      <tr><td><code>.play()</code></td><td>Start timeline</td></tr>
+      <tr><td><code>.pause()</code></td><td>Pause timeline</td></tr>
+      <tr><td><code>.restart()</code></td><td>Restart from beginning</td></tr>
+      <tr><td><code>.reverse()</code></td><td>Toggle reverse</td></tr>
+      <tr><td><code>.resume()</code></td><td>Resume if paused</td></tr>
+      <tr><td><code>.seek(time)</code></td><td>Seek to absolute time</td></tr>
+      <tr><td><code>.stretch(duration)</code></td><td>Change total duration</td></tr>
+      <tr><td><code>.cancel()</code></td><td>Stop timeline</td></tr>
+      <tr><td><code>.then(cb)</code></td><td>Promise-based completion</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Properties</h2>
+  <table class="api-table">
+    <thead><tr><th>Property</th><th>Type</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><code>duration</code></td><td>number</td><td>Total timeline duration</td></tr>
+      <tr><td><code>currentTime</code></td><td>number</td><td>Current position in ms</td></tr>
+      <tr><td><code>progress</code></td><td>number</td><td>0..1 progress</td></tr>
+      <tr><td><code>paused</code></td><td>boolean</td><td>Paused state</td></tr>
+      <tr><td><code>reversed</code></td><td>boolean</td><td>Reversed state</td></tr>
+    </tbody>
+  </table>
+
+  <hr>
+
+  <h2>Demos</h2>
+
+  <h3>Sequential Timeline</h3>
+  <div class="demo-box">
+    <div class="demo-title">Live Demo &mdash; Sequential Animation</div>
+    <div class="demo-area">
+      <div class="flex gap-1" style="margin-bottom:10px;">
+        <div class="anim-box" id="tl-seq1" style="background:linear-gradient(135deg,#6c63ff,#8b5cf6);"></div>
+        <div class="anim-box" id="tl-seq2" style="background:linear-gradient(135deg,#8b5cf6,#a78bfa);"></div>
+        <div class="anim-box" id="tl-seq3" style="background:linear-gradient(135deg,#a78bfa,#c4b5fd);"></div>
+      </div>
+      <div class="timeline-track" id="tl-track" style="margin-bottom:10px;">
+        <div class="timeline-block" style="background:var(--accent);flex:1;">Step 1</div>
+        <div class="timeline-block" style="background:#8b5cf6;flex:1;">Step 2</div>
+        <div class="timeline-block" style="background:#a78bfa;flex:1;">Step 3</div>
+      </div>
+      <button class="demo-btn" onclick="tlSeqDemo()">Play Timeline</button>
+      <button class="demo-btn secondary" onclick="tlSeqRestart()">Restart</button>
+    </div>
+  </div>
+  <pre><code class="language-javascript">const tl = Anim233.timeline();
+tl.add({ targets: '#a', x: 200, duration: 400, ease: 'easeOutCubic' });
+tl.add({ targets: '#b', x: 200, duration: 400, ease: 'easeOutCubic' }, '-=100');
+tl.add({ targets: '#c', x: 200, duration: 400, ease: 'easeOutCubic' }, '-=100');
+tl.play();</code></pre>
+
+  <h3>Overlapping Timeline</h3>
+  <div class="demo-box">
+    <div class="demo-title">Live Demo &mdash; Overlapping with offset</div>
+    <div class="demo-area">
+      <div class="flex gap-1" style="margin-bottom:10px;">
+        <div class="anim-box" id="tl-over1" style="background:#6c63ff;"></div>
+        <div class="anim-box" id="tl-over2" style="background:#ff6584;"></div>
+        <div class="anim-box" id="tl-over3" style="background:#4ade80;"></div>
+        <div class="anim-box" id="tl-over4" style="background:#facc15;"></div>
+      </div>
+      <button class="demo-btn" onclick="tlOverlapDemo()">Play Overlapping</button>
+    </div>
+  </div>
+  <pre><code class="language-javascript">const tl = Anim233.timeline();
+tl.add({ targets: '#a', x: 150, rotate: 180, duration: 600 });
+tl.add({ targets: '#b', x: 150, rotate: -180, duration: 600 }, '-=400');
+tl.add({ targets: '#c', x: 150, rotate: 180, duration: 600 }, '-=400');
+tl.add({ targets: '#d', x: 150, rotate: -180, duration: 600 }, '-=400');
+tl.play();</code></pre>
+
+  <h3>Timeline with Callbacks</h3>
+  <div class="demo-box">
+    <div class="demo-title">Live Demo &mdash; Call function at offset</div>
+    <div class="demo-area">
+      <div class="anim-box" id="tl-callback" style="margin-bottom:10px;"></div>
+      <div id="tl-callback-log" style="font-family:'JetBrains Mono',monospace;font-size:0.8rem;color:var(--text-dim);min-height:3em;"></div>
+      <button class="demo-btn" onclick="tlCallbackDemo()">Play</button>
+    </div>
+  </div>
+  <pre><code class="language-javascript">const tl = Anim233.timeline();
+tl.add({ targets: '#box', x: 200, duration: 500 });
+tl.call(() => log('Halfway!'), 250);
+tl.add({ targets: '#box', y: -100, duration: 500 }, '+=0');
+tl.call(() => log('Complete!'));
+tl.play();</code></pre>
+
+  <h3>Promise-based Timeline</h3>
+  <pre><code class="language-javascript">const tl = Anim233.timeline({ autoplay: false });
+tl.add({ targets: '#a', x: 200, duration: 500 });
+tl.add({ targets: '#b', x: 200, duration: 500 }, '-=200');
+await tl.then();
+console.log('Timeline finished');</code></pre>
+
+  <div class="footer">Anim233 &copy; 2025 &middot; <a href="https://github.com/neko233-com/anim233-ts">GitHub</a></div>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="js/demos.js"></script>
+<script>
+let tlSeqInst = null;
+function resetTlBox(id) { const el = document.getElementById(id); el.style.transform = 'translate(0,0) rotate(0deg) scale(1)'; return el; }
+function tlSeqDemo() {
+  animReady(A => {
+    ['tl-seq1','tl-seq2','tl-seq3'].forEach(id => resetTlBox(id));
+    const track = document.getElementById('tl-track');
+    track.querySelectorAll('.timeline-block').forEach(b => { b.style.opacity = '0.4'; b.style.transition = 'opacity 0.3s'; });
+    tlSeqInst = A.timeline();
+    tlSeqInst.add({ targets: '#tl-seq1', x: 250, rotate: 180, duration: 500, ease: 'easeOutCubic',
+      onBegin: () => { track.children[0].style.opacity = '1'; },
+      onComplete: () => { track.children[0].style.opacity = '0.4'; }
+    });
+    tlSeqInst.add({ targets: '#tl-seq2', x: 250, rotate: -180, duration: 500, ease: 'easeOutCubic',
+      onBegin: () => { track.children[1].style.opacity = '1'; },
+      onComplete: () => { track.children[1].style.opacity = '0.4'; }
+    });
+    tlSeqInst.add({ targets: '#tl-seq3', x: 250, rotate: 360, duration: 500, ease: 'easeOutCubic',
+      onBegin: () => { track.children[2].style.opacity = '1'; },
+      onComplete: () => { track.children[2].style.opacity = '0.4'; }
+    });
+    tlSeqInst.play();
+  });
+}
+function tlSeqRestart() {
+  if (tlSeqInst) tlSeqInst.restart();
+}
+function tlOverlapDemo() {
+  animReady(A => {
+    ['tl-over1','tl-over2','tl-over3','tl-over4'].forEach(id => resetTlBox(id));
+    const tl = A.timeline();
+    tl.add({ targets: '#tl-over1', x: 180, rotate: 180, duration: 600, ease: 'easeOutCubic' });
+    tl.add({ targets: '#tl-over2', x: 180, rotate: -180, duration: 600, ease: 'easeOutCubic' }, '-=400');
+    tl.add({ targets: '#tl-over3', x: 180, rotate: 180, duration: 600, ease: 'easeOutCubic' }, '-=400');
+    tl.add({ targets: '#tl-over4', x: 180, rotate: -180, duration: 600, ease: 'easeOutCubic' }, '-=400');
+    tl.play();
+  });
+}
+function tlCallbackDemo() {
+  animReady(A => {
+    resetTlBox('tl-callback');
+    const logEl = document.getElementById('tl-callback-log');
+    logEl.innerHTML = '';
+    const tl = A.timeline();
+    tl.add({ targets: '#tl-callback', x: 200, duration: 600, ease: 'easeOutCubic' });
+    tl.call(() => { logEl.innerHTML += '>> Step 1 complete<br>'; }, 300);
+    tl.add({ targets: '#tl-callback', y: -80, rotate: 180, duration: 500, ease: 'easeOutBack' });
+    tl.call(() => { logEl.innerHTML += '>> Step 2 complete<br>'; });
+    tl.add({ targets: '#tl-callback', x: 0, y: 0, rotate: 0, duration: 500, ease: 'easeInOutQuad' });
+    tl.call(() => { logEl.innerHTML += '>> All done!'; });
+    tl.play();
+  });
+}
+</script>
+</body>
+</html>

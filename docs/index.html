@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Anim233 - Modern Animation Library</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.css">
+</head>
+<body>
+
+<div class="mobile-header">
+  <button class="hamburger">&#9776;</button>
+  <h1>Anim233</h1>
+</div>
+<div class="sidebar-overlay"></div>
+
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <h1>Anim233</h1>
+    <span class="version">v1.0.0</span>
+  </div>
+  <nav>
+    <div class="nav-section">Getting Started</div>
+    <a href="index.html">Home</a>
+    <a href="getting-started.html">Installation</a>
+    <div class="nav-section">Core APIs</div>
+    <a href="tween.html">Tween (DOTween)</a>
+    <a href="animation.html">Animate (anime.js)</a>
+    <a href="timeline.html">Timeline</a>
+    <a href="easings.html">Easings</a>
+    <div class="nav-section">Advanced</div>
+    <a href="shader.html">Shader (WebGL)</a>
+    <a href="draggable.html">Draggable</a>
+    <a href="scroll.html">Scroll</a>
+    <a href="text.html">Text Effects</a>
+    <a href="svg.html">SVG Animation</a>
+    <div class="nav-section">Reference</div>
+    <a href="utilities.html">Utilities</a>
+    <a href="api-reference.html">API Reference</a>
+  </nav>
+</aside>
+
+<main class="main">
+  <section class="hero">
+    <div class="hero-badges">
+      <span class="badge badge-primary">TypeScript</span>
+      <span class="badge badge-green">Tree-shakeable</span>
+      <span class="badge badge-pink">Zero Dependencies</span>
+    </div>
+    <h1>Anim233</h1>
+    <p class="tagline">A powerful, zero-dependency animation library combining DOTween-style chains, anime.js-style declarative API, WebGL shaders, and rich utilities — all in 12KB.</p>
+    <div class="hero-badges">
+      <a href="getting-started.html" class="demo-btn">Get Started</a>
+      <a href="https://github.com/neko233-com/anim233-ts" class="demo-btn secondary" target="_blank">GitHub</a>
+    </div>
+  </section>
+
+  <div class="demo-box">
+    <div class="demo-title">Live Demo &mdash; Hero Animation</div>
+    <div class="demo-area" id="hero-demo" style="min-height:250px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:20px;">
+      <canvas id="hero-shader" class="shader-canvas" style="width:100%; max-width:700px; aspect-ratio:16/7; border-radius:12px;"></canvas>
+      <div class="flex gap-1">
+        <div class="anim-box" id="hero-box1" style="opacity:0;"></div>
+        <div class="anim-box" id="hero-box2" style="opacity:0;"></div>
+        <div class="anim-box" id="hero-box3" style="opacity:0;"></div>
+      </div>
+      <button class="demo-btn" onclick="runHeroDemo()">Play Animation</button>
+    </div>
+  </div>
+
+  <h2>Features</h2>
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-icon">&#9654;</div>
+      <h3>Tween Chains</h3>
+      <p>DOTween-inspired sequential chaining: <code>.to() .to() .delay() .play()</code></p>
+    </div>
+    <div class="card">
+      <div class="card-icon">&#9881;</div>
+      <h3>Declarative Animate</h3>
+      <p>anime.js-style <code>Anim233.animate()</code> with full control over targets, easing, and callbacks.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">&#9201;</div>
+      <h3>Timeline</h3>
+      <p>Sequence and orchestrate multiple animations with precise timing offsets.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">&#127912;</div>
+      <h3>40 Easings</h3>
+      <p>Complete easing library including Back, Elastic, Bounce, and custom registration.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">&#128300;</div>
+      <h3>WebGL Shaders</h3>
+      <p>Create real-time shader animations with hot-swap, uniforms, and auto-time.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">&#9994;</div>
+      <h3>Draggable</h3>
+      <p>Physics-based drag interactions with spring, snap, and container confinement.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">&#128270;</div>
+      <h3>Text Splitting</h3>
+      <p>Split text into characters for scramble and reveal effects.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">&#128200;</div>
+      <h3>Scroll Animations</h3>
+      <p>Trigger animations based on scroll position and viewport intersection.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">&#128296;</div>
+      <h3>Math Utilities</h3>
+      <p><code>lerp</code>, <code>damp</code>, <code>clamp</code>, <code>mapRange</code>, <code>stagger</code>, and more.</p>
+    </div>
+  </div>
+
+  <h2>Quick Start</h2>
+  <div class="side-by-side">
+    <div>
+      <p class="text-sm text-dim mb-1">Install via npm:</p>
+      <pre><code class="language-bash">npm install anim233-ts</code></pre>
+      <p class="text-sm text-dim mb-1">Or use CDN:</p>
+      <pre><code class="language-html">&lt;script src="https://unpkg.com/anim233-ts@latest/dist/index.min.js"&gt;&lt;/script&gt;</code></pre>
+    </div>
+    <div>
+      <p class="text-sm text-dim mb-1">Animate in 2 lines:</p>
+      <pre><code class="language-javascript">Anim233.tween('#box')
+  .to({ x: 200, rotate: 360 }, 800, 'easeOutCubic')
+  .to({ scale: 1.5 }, 400, 'easeOutBack')
+  .play();</code></pre>
+    </div>
+  </div>
+
+  <div class="footer">
+    Anim233 &copy; 2025 &middot; <a href="https://github.com/neko233-com/anim233-ts" target="_blank">GitHub</a> &middot; MIT License
+  </div>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-glsl.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
+<script src="js/demos.js"></script>
+<script>
+let heroShader = null;
+function runHeroDemo() {
+  animReady(A => {
+    if (!heroShader) {
+      heroShader = A.createShaderAnim233({
+        target: document.getElementById('hero-shader'),
+        fragment: `
+          precision mediump float;
+          uniform float time;
+          uniform vec2 resolution;
+          void main() {
+            vec2 uv = gl_FragCoord.xy / resolution;
+            vec3 col = vec3(0.0);
+            for(float i = 1.0; i < 6.0; i++) {
+              float d = length(uv - vec2(0.5));
+              float a = atan(uv.y - 0.5, uv.x - 0.5) + time * 0.5;
+              d += 0.05 * sin(a * i * 3.0 + time * 2.0);
+              col += smoothstep(0.4, 0.0, d) * (0.3 / i);
+            }
+            col.r *= 0.42 + 0.58 * sin(time * 0.7);
+            col.g *= 0.39 + 0.61 * cos(time * 0.5);
+            col.b *= 0.6;
+            gl_FragColor = vec4(col, 1.0);
+          }`
+      });
+    }
+    const boxes = [document.getElementById('hero-box1'), document.getElementById('hero-box2'), document.getElementById('hero-box3')];
+    boxes.forEach(b => { b.style.opacity = 0; b.style.transform = 'translateY(30px) scale(0.5)'; });
+    A.tween(boxes)
+      .to({ y: 0, scale: 1, opacity: 1 }, 600, 'easeOutBack')
+      .to({ rotate: 360 }, 800, 'easeInOutCubic')
+      .play();
+  });
+}
+window.addEventListener('load', () => setTimeout(runHeroDemo, 500));
+</script>
+</body>
+</html>

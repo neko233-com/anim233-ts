@@ -1,6 +1,6 @@
 {
   "name": "anim233-ts",
-  "version": "0.3.0",
+  "version": "1.0.0",
   "description": "neko233-com 编写, 其目的是增强版的 anime.js ，提供更多更加现代化的动画，且绝对傻瓜式 + agent first 的动画库",
   "main": "dist/index.min.js",
   "module": "dist/index.esm.js",

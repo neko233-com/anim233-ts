@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Easings - Anim233</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+</head>
+<body>
+
+<div class="mobile-header"><button class="hamburger">&#9776;</button><h1>Anim233</h1></div>
+<div class="sidebar-overlay"></div>
+<aside class="sidebar">
+  <div class="sidebar-brand"><h1>Anim233</h1><span class="version">v1.0.0</span></div>
+  <nav>
+    <div class="nav-section">Getting Started</div>
+    <a href="index.html">Home</a>
+    <a href="getting-started.html">Installation</a>
+    <div class="nav-section">Core APIs</div>
+    <a href="tween.html">Tween (DOTween)</a>
+    <a href="animation.html">Animate (anime.js)</a>
+    <a href="timeline.html">Timeline</a>
+    <a href="easings.html">Easings</a>
+    <div class="nav-section">Advanced</div>
+    <a href="shader.html">Shader (WebGL)</a>
+    <a href="draggable.html">Draggable</a>
+    <a href="scroll.html">Scroll</a>
+    <a href="text.html">Text Effects</a>
+    <a href="svg.html">SVG Animation</a>
+    <div class="nav-section">Reference</div>
+    <a href="utilities.html">Utilities</a>
+    <a href="api-reference.html">API Reference</a>
+  </nav>
+</aside>
+
+<main class="main">
+  <h1>Easings</h1>
+  <p>40 built-in easing functions. Each maps a progress value <code>[0..1]</code> to an output <code>[0..1]</code>. Click any easing to see its curve and interactive demo.</p>
+
+  <h2>Selected Easing</h2>
+  <div class="demo-box">
+    <div class="demo-title">Curve Viewer</div>
+    <div class="demo-area" style="display:flex;gap:2rem;align-items:center;flex-wrap:wrap;">
+      <div>
+        <canvas id="easing-curve" width="300" height="300" style="width:300px;height:300px;border-radius:8px;background:var(--bg);"></canvas>
+      </div>
+      <div style="flex:1;min-width:200px;">
+        <h3 id="easing-name" style="margin-top:0;">linear</h3>
+        <div style="margin:1rem 0;">
+          <div style="height:8px;background:var(--border);border-radius:4px;overflow:hidden;position:relative;">
+            <div id="easing-track" style="height:100%;background:var(--gradient);border-radius:4px;width:0%;"></div>
+          </div>
+          <div style="margin-top:8px;position:relative;height:40px;">
+            <div id="easing-box" style="width:40px;height:40px;background:var(--gradient);border-radius:8px;position:absolute;left:0;top:0;"></div>
+          </div>
+        </div>
+        <button class="demo-btn" onclick="playEasingDemo()">Play Demo</button>
+        <button class="demo-btn secondary" onclick="resetEasingDemo()">Reset</button>
+      </div>
+    </div>
+  </div>
+
+  <h2>All Easings</h2>
+  <p class="text-dim text-sm mb-2">Click any card to see the curve and demo.</p>
+  <div class="easing-grid" id="easing-grid"></div>
+
+  <hr>
+
+  <h2>Usage</h2>
+  <pre><code class="language-javascript">// With tween
+Anim233.tween('#box')
+  .to({ x: 200 }, 500, 'easeOutBack')
+  .play();
+
+// With animate
+Anim233.animate({
+  targets: '#box',
+  x: 200,
+  ease: 'easeOutElastic'
+});
+
+// Custom easing function
+Anim233.registerEasing('myEase', (t) => t * t);
+Anim233.tween('#box').to({ x: 200 }, 500, 'myEase').play();
+
+// Inline function
+Anim233.tween('#box').to({ x: 200 }, 500, (t) => t * t).play();</code></pre>
+
+  <h2>Easing API</h2>
+  <table class="api-table">
+    <thead><tr><th>Function</th><th>Signature</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><code>registerEasing</code></td><td>(name: string, fn: (t) =&gt; number) =&gt; void</td><td>Register a custom easing</td></tr>
+      <tr><td><code>getEasing</code></td><td>(name: string) =&gt; EasingFunction | undefined</td><td>Get easing by name</td></tr>
+      <tr><td><code>listEasings</code></td><td>() =&gt; string[]</td><td>List all registered easing names</td></tr>
+    </tbody>
+  </table>
+
+  <h2>All Easing Names</h2>
+  <table class="api-table">
+    <thead><tr><th>Category</th><th>Names</th></tr></thead>
+    <tbody>
+      <tr><td>Basic</td><td><code>linear</code>, <code>ease</code>, <code>easeIn</code>, <code>easeOut</code>, <code>easeInOut</code></td></tr>
+      <tr><td>Quad</td><td><code>easeInQuad</code>, <code>easeOutQuad</code>, <code>easeInOutQuad</code></td></tr>
+      <tr><td>Cubic</td><td><code>easeInCubic</code>, <code>easeOutCubic</code>, <code>easeInOutCubic</code></td></tr>
+      <tr><td>Quart</td><td><code>easeInQuart</code>, <code>easeOutQuart</code>, <code>easeInOutQuart</code></td></tr>
+      <tr><td>Quint</td><td><code>easeInQuint</code>, <code>easeOutQuint</code>, <code>easeInOutQuint</code></td></tr>
+      <tr><td>Sine</td><td><code>easeInSine</code>, <code>easeOutSine</code>, <code>easeInOutSine</code></td></tr>
+      <tr><td>Expo</td><td><code>easeInExpo</code>, <code>easeOutExpo</code>, <code>easeInOutExpo</code></td></tr>
+      <tr><td>Circ</td><td><code>easeInCirc</code>, <code>easeOutCirc</code>, <code>easeInOutCirc</code></td></tr>
+      <tr><td>Back</td><td><code>easeInBack</code>, <code>easeOutBack</code>, <code>easeInOutBack</code>, <code>inBack</code>, <code>outBack</code>, <code>inOutBack</code></td></tr>
+      <tr><td>Elastic</td><td><code>easeInElastic</code>, <code>easeOutElastic</code>, <code>easeInOutElastic</code>, <code>inElastic</code>, <code>outElastic</code>, <code>inOutElastic</code></td></tr>
+      <tr><td>Bounce</td><td><code>easeInBounce</code>, <code>easeOutBounce</code>, <code>easeInOutBounce</code>, <code>inBounce</code>, <code>outBounce</code>, <code>inOutBounce</code></td></tr>
+    </tbody>
+  </table>
+
+  <div class="footer">Anim233 &copy; 2025 &middot; <a href="https://github.com/neko233-com/anim233-ts">GitHub</a></div>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="js/demos.js"></script>
+<script>
+const ALL_EASINGS = [
+  'linear',
+  'easeInQuad','easeOutQuad','easeInOutQuad',
+  'easeInCubic','easeOutCubic','easeInOutCubic',
+  'easeInQuart','easeOutQuart','easeInOutQuart',
+  'easeInQuint','easeOutQuint','easeInOutQuint',
+  'easeInSine','easeOutSine','easeInOutSine',
+  'easeInExpo','easeOutExpo','easeInOutExpo',
+  'easeInCirc','easeOutCirc','easeInOutCirc',
+  'easeInBack','easeOutBack','easeInOutBack',
+  'easeInElastic','easeOutElastic','easeInOutElastic',
+  'easeInBounce','easeOutBounce','easeInOutBounce'
+];
+
+function bounceOut(t) {
+  const n1 = 7.5625, d1 = 2.75;
+  if (t < 1 / d1) return n1 * t * t;
+  if (t < 2 / d1) return n1 * (t -= 1.5 / d1) * t + 0.75;
+  if (t < 2.5 / d1) return n1 * (t -= 2.25 / d1) * t + 0.9375;
+  return n1 * (t -= 2.625 / d1) * t + 0.984375;
+}
+function elasticOut(t) {
+  if (t === 0 || t === 1) return t;
+  return Math.pow(2, -10 * t) * Math.sin((t - 0.075) * (2 * Math.PI) / 0.3) + 1;
+}
+
+const easingFns = {
+  linear: t => t,
+  easeInQuad: t => t * t,
+  easeOutQuad: t => t * (2 - t),
+  easeInOutQuad: t => t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t,
+  easeInCubic: t => t * t * t,
+  easeOutCubic: t => (--t) * t * t + 1,
+  easeInOutCubic: t => t < 0.5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1,
+  easeInQuart: t => t * t * t * t,
+  easeOutQuart: t => 1 - (--t) * t * t * t,
+  easeInOutQuart: t => t < 0.5 ? 8 * t * t * t * t : 1 - 8 * (--t) * t * t * t,
+  easeInQuint: t => t * t * t * t * t,
+  easeOutQuint: t => 1 + (--t) * t * t * t * t,
+  easeInOutQuint: t => t < 0.5 ? 16 * t * t * t * t * t : 1 + 16 * (--t) * t * t * t * t,
+  easeInSine: t => 1 - Math.cos(t * Math.PI / 2),
+  easeOutSine: t => Math.sin(t * Math.PI / 2),
+  easeInOutSine: t => -(Math.cos(Math.PI * t) - 1) / 2,
+  easeInExpo: t => t === 0 ? 0 : Math.pow(2, 10 * (t - 1)),
+  easeOutExpo: t => t === 1 ? 1 : 1 - Math.pow(2, -10 * t),
+  easeInOutExpo: t => { if (t === 0 || t === 1) return t; return t < 0.5 ? Math.pow(2, 20 * t - 10) / 2 : (2 - Math.pow(2, -20 * t + 10)) / 2; },
+  easeInCirc: t => 1 - Math.sqrt(1 - t * t),
+  easeOutCirc: t => Math.sqrt(1 - (--t) * t),
+  easeInOutCirc: t => t < 0.5 ? (1 - Math.sqrt(1 - 4 * t * t)) / 2 : (Math.sqrt(1 - (-2 * t + 2) * (-2 * t + 2)) + 1) / 2,
+  easeInBack: t => 2.70158 * t * t * t - 1.70158 * t * t,
+  easeOutBack: t => 1 + 2.70158 * Math.pow(t - 1, 3) + 1.70158 * Math.pow(t - 1, 2),
+  easeInOutBack: t => {
+    const c = 2.70158 * 1.525;
+    return t < 0.5 ? (Math.pow(2 * t, 2) * ((c + 1) * 2 * t - c)) / 2 : (Math.pow(2 * t - 2, 2) * ((c + 1) * (t * 2 - 2) + c) + 2) / 2;
+  },
+  easeInElastic: t => t === 0 ? 0 : t === 1 ? 1 : -Math.pow(2, 10 * t - 10) * Math.sin((t * 10 - 10.75) * (2 * Math.PI) / 3),
+  easeOutElastic: elasticOut,
+  easeInOutElastic: t => {
+    if (t === 0 || t === 1) return t;
+    return t < 0.5 ? -(Math.pow(2, 20 * t - 10) * Math.sin((20 * t - 11.125) * (2 * Math.PI) / 4.5)) / 2 : (Math.pow(2, -20 * t + 10) * Math.sin((20 * t - 11.125) * (2 * Math.PI) / 4.5)) / 2 + 1;
+  },
+  easeInBounce: t => 1 - bounceOut(1 - t),
+  easeOutBounce: bounceOut,
+  easeInOutBounce: t => t < 0.5 ? (1 - bounceOut(1 - 2 * t)) / 2 : (1 + bounceOut(2 * t - 1)) / 2
+};
+
+let selectedEasing = 'easeOutCubic';
+
+function drawEasingCurve(name) {
+  const canvas = document.getElementById('easing-curve');
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width, h = canvas.height;
+  const pad = 30;
+  const fn = easingFns[name] || easingFns.linear;
+
+  ctx.clearRect(0, 0, w, h);
+
+  // Grid
+  ctx.strokeStyle = '#1e1e2e';
+  ctx.lineWidth = 1;
+  for (let i = 0; i <= 4; i++) {
+    const p = pad + (w - 2 * pad) * i / 4;
+    ctx.beginPath(); ctx.moveTo(p, pad); ctx.lineTo(p, h - pad); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(pad, p); ctx.lineTo(w - pad, p); ctx.stroke();
+  }
+
+  // Diagonal reference
+  ctx.strokeStyle = '#333';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([4, 4]);
+  ctx.beginPath();
+  ctx.moveTo(pad, h - pad);
+  ctx.lineTo(w - pad, pad);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Curve
+  ctx.strokeStyle = '#6c63ff';
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  const steps = 200;
+  for (let i = 0; i <= steps; i++) {
+    const t = i / steps;
+    const v = fn(t);
+    const x = pad + t * (w - 2 * pad);
+    const y = (h - pad) - v * (h - 2 * pad);
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+
+  // Labels
+  ctx.fillStyle = '#8888a0';
+  ctx.font = '11px Inter, sans-serif';
+  ctx.fillText('0', pad - 2, h - pad + 15);
+  ctx.fillText('1', w - pad - 2, h - pad + 15);
+  ctx.fillText('1', pad - 12, pad + 4);
+}
+
+function selectEasing(name) {
+  selectedEasing = name;
+  document.getElementById('easing-name').textContent = name;
+  drawEasingCurve(name);
+  document.querySelectorAll('.easing-card').forEach(c => c.classList.remove('active'));
+  const card = document.querySelector(`.easing-card[data-name="${name}"]`);
+  if (card) card.classList.add('active');
+  resetEasingDemo();
+}
+
+function playEasingDemo() {
+  const fn = easingFns[selectedEasing] || easingFns.linear;
+  const box = document.getElementById('easing-box');
+  const track = document.getElementById('easing-track');
+  const startTime = performance.now();
+  const duration = 1200;
+  function step(now) {
+    const elapsed = now - startTime;
+    const raw = Math.min(elapsed / duration, 1);
+    const val = fn(raw);
+    box.style.left = (val * 260) + 'px';
+    track.style.width = (raw * 100) + '%';
+    if (raw < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+function resetEasingDemo() {
+  document.getElementById('easing-box').style.left = '0px';
+  document.getElementById('easing-track').style.width = '0%';
+}
+
+// Build grid
+const grid = document.getElementById('easing-grid');
+ALL_EASINGS.forEach(name => {
+  const card = document.createElement('div');
+  card.className = 'easing-card' + (name === selectedEasing ? ' active' : '');
+  card.dataset.name = name;
+  card.onclick = () => selectEasing(name);
+
+  const canvas = document.createElement('canvas');
+  canvas.width = 100;
+  canvas.height = 100;
+  card.appendChild(canvas);
+
+  const label = document.createElement('div');
+  label.className = 'name';
+  label.textContent = name;
+  card.appendChild(label);
+
+  grid.appendChild(card);
+
+  // Draw mini curve
+  const ctx = canvas.getContext('2d');
+  const fn = easingFns[name] || easingFns.linear;
+  const sz = 100, p = 8;
+  ctx.strokeStyle = '#6c63ff';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  for (let i = 0; i <= 60; i++) {
+    const t = i / 60;
+    const v = fn(t);
+    const x = p + t * (sz - 2 * p);
+    const y = (sz - p) - v * (sz - 2 * p);
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+});
+
+// Initial draw
+drawEasingCurve(selectedEasing);
+</script>
+</body>
+</html>

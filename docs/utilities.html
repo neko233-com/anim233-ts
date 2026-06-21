@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Utilities - Anim233</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+</head>
+<body>
+
+<div class="mobile-header"><button class="hamburger">&#9776;</button><h1>Anim233</h1></div>
+<div class="sidebar-overlay"></div>
+<aside class="sidebar">
+  <div class="sidebar-brand"><h1>Anim233</h1><span class="version">v1.0.0</span></div>
+  <nav>
+    <div class="nav-section">Getting Started</div>
+    <a href="index.html">Home</a>
+    <a href="getting-started.html">Installation</a>
+    <div class="nav-section">Core APIs</div>
+    <a href="tween.html">Tween (DOTween)</a>
+    <a href="animation.html">Animate (anime.js)</a>
+    <a href="timeline.html">Timeline</a>
+    <a href="easings.html">Easings</a>
+    <div class="nav-section">Advanced</div>
+    <a href="shader.html">Shader (WebGL)</a>
+    <a href="draggable.html">Draggable</a>
+    <a href="scroll.html">Scroll</a>
+    <a href="text.html">Text Effects</a>
+    <a href="svg.html">SVG Animation</a>
+    <div class="nav-section">Reference</div>
+    <a href="utilities.html">Utilities</a>
+    <a href="api-reference.html">API Reference</a>
+  </nav>
+</aside>
+
+<main class="main">
+  <h1>Utilities</h1>
+  <p>14 math and array utilities included with Anim233. All are available via the global <code>Anim233</code> namespace or as named imports.</p>
+
+  <h2>Math Utilities</h2>
+  <table class="api-table">
+    <thead><tr><th>Function</th><th>Signature</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><code>lerp</code></td><td>(start, end, t) =&gt; number</td><td>Linear interpolation between start and end</td></tr>
+      <tr><td><code>damp</code></td><td>(start, end, smooth, dt) =&gt; number</td><td>Exponential smoothing (damped lerp)</td></tr>
+      <tr><td><code>clamp</code></td><td>(value, min, max) =&gt; number</td><td>Clamp value to range</td></tr>
+      <tr><td><code>snap</code></td><td>(value, gridValues) =&gt; number</td><td>Snap to grid or nearest array value</td></tr>
+      <tr><td><code>wrap</code></td><td>(value, min, max) =&gt; number</td><td>Wrap value in range (modulo)</td></tr>
+      <tr><td><code>mapRange</code></td><td>(value, inMin, inMax, outMin, outMax) =&gt; number</td><td>Linear range mapping</td></tr>
+      <tr><td><code>round</code></td><td>(value, decimals?) =&gt; number</td><td>Round to N decimal places</td></tr>
+      <tr><td><code>random</code></td><td>(min, max) =&gt; number</td><td>Random float in range</td></tr>
+      <tr><td><code>createSeededRandom</code></td><td>(seed) =&gt; () =&gt; number</td><td>Deterministic PRNG (LCG algorithm)</td></tr>
+      <tr><td><code>degToRad</code></td><td>(deg) =&gt; number</td><td>Degrees to radians</td></tr>
+      <tr><td><code>radToDeg</code></td><td>(rad) =&gt; number</td><td>Radians to degrees</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Array Utilities</h2>
+  <table class="api-table">
+    <thead><tr><th>Function</th><th>Signature</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><code>randomPick</code></td><td>(array) =&gt; T</td><td>Random element from array</td></tr>
+      <tr><td><code>shuffle</code></td><td>(array) =&gt; T[]</td><td>Fisher-Yates shuffle (returns new array)</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Async Utilities</h2>
+  <table class="api-table">
+    <thead><tr><th>Function</th><th>Signature</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><code>wait</code></td><td>(ms) =&gt; Promise&lt;void&gt;</td><td>Promise-based delay</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Stagger</h2>
+  <table class="api-table">
+    <thead><tr><th>Function</th><th>Signature</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><code>stagger</code></td><td>(value, options?) =&gt; (index, total) =&gt; number</td><td>Stagger value calculator for per-element delays/offsets</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Stagger Options</h3>
+  <table class="api-table">
+    <thead><tr><th>Option</th><th>Type</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><code>start</code></td><td>number</td><td>Starting value</td></tr>
+      <tr><td><code>from</code></td><td>number | 'first' | 'last' | 'center' | 'random'</td><td>Starting index</td></tr>
+      <tr><td><code>reversed</code></td><td>boolean</td><td>Reverse order</td></tr>
+      <tr><td><code>ease</code></td><td>EasingName | EasingFunction</td><td>Easing for stagger distribution</td></tr>
+      <tr><td><code>grid</code></td><td>[number, number]</td><td>Grid dimensions [rows, cols]</td></tr>
+      <tr><td><code>axis</code></td><td>'x' | 'y'</td><td>Grid axis</td></tr>
+      <tr><td><code>modifier</code></td><td>(val, index) =&gt; number</td><td>Custom value modifier</td></tr>
+      <tr><td><code>total</code></td><td>number</td><td>Total items (auto-detected from target)</td></tr>
+    </tbody>
+  </table>
+
+  <hr>
+
+  <h2>Demos</h2>
+
+  <h3>lerp (Linear Interpolation)</h3>
+  <div class="demo-box">
+    <div class="demo-title">Live Demo</div>
+    <div class="demo-area">
+      <div class="anim-bar" style="width:300px;"><div class="anim-bar-fill" id="lerp-fill"></div></div>
+      <div class="flex gap-2 mt-1" style="align-items:center;">
+        <span class="text-xs text-dim">t =</span>
+        <input type="range" min="0" max="1" step="0.01" value="0" id="lerp-slider" style="flex:1;" oninput="lerpDemo(this.value)">
+        <span class="text-xs" id="lerp-value" style="font-family:'JetBrains Mono',monospace;">0.00</span>
+      </div>
+      <pre class="mt-1"><code class="language-javascript">Anim233.lerp(0, 100, 0.5)  // 50
+Anim233.lerp(0, 100, 0.75) // 75</code></pre>
+    </div>
+  </div>
+
+  <h3>clamp</h3>
+  <div class="demo-box">
+    <div class="demo-title">Interactive</div>
+    <div class="demo-area">
+      <div class="flex gap-2" style="align-items:center;">
+        <span class="text-xs text-dim">Value:</span>
+        <input type="range" min="-100" max="200" value="50" id="clamp-slider" style="flex:1;" oninput="clampDemo()">
+        <span class="text-xs" style="font-family:'JetBrains Mono',monospace;min-width:50px;" id="clamp-input">50</span>
+      </div>
+      <div class="mt-1">
+        <span class="text-xs text-dim">Clamped [0, 100] = </span>
+        <span class="text-xs" style="font-family:'JetBrains Mono',monospace;color:var(--accent);" id="clamp-output">50</span>
+      </div>
+      <pre class="mt-1"><code class="language-javascript">Anim233.clamp(50, 0, 100)   // 50
+Anim233.clamp(-10, 0, 100)  // 0
+Anim233.clamp(150, 0, 100)  // 100</code></pre>
+    </div>
+  </div>
+
+  <h3>mapRange</h3>
+  <div class="demo-box">
+    <div class="demo-title">Interactive</div>
+    <div class="demo-area">
+      <div class="flex gap-2" style="align-items:center;">
+        <span class="text-xs text-dim">Input [0..1]:</span>
+        <input type="range" min="0" max="1" step="0.01" value="0.5" id="map-slider" style="flex:1;" oninput="mapRangeDemo()">
+        <span class="text-xs" style="font-family:'JetBrains Mono',monospace;min-width:100px;" id="map-output">50..150</span>
+      </div>
+      <pre class="mt-1"><code class="language-javascript">Anim233.mapRange(0.5, 0, 1, 50, 150)  // 100
+Anim233.mapRange(0, 0, 1, 0, 360)     // 0
+Anim233.mapRange(1, 0, 1, 0, 360)     // 360</code></pre>
+    </div>
+  </div>
+
+  <h3>random</h3>
+  <pre><code class="language-javascript">Anim233.random(0, 100)    // e.g. 47.238...
+Anim233.randomPick(['a','b','c'])  // e.g. 'b'
+Anim233.shuffle([1,2,3,4,5])     // e.g. [3,1,5,2,4]</code></pre>
+
+  <h3>Seeded Random</h3>
+  <pre><code class="language-javascript">const rng = Anim233.createSeededRandom(42);
+rng(); // 0.374... (always same with seed 42)
+rng(); // 0.731... (deterministic sequence)</code></pre>
+
+  <h3>wait (async delay)</h3>
+  <pre><code class="language-javascript">async function sequence() {
+  console.log('start');
+  await Anim233.wait(1000);
+  console.log('after 1 second');
+  await Anim233.wait(500);
+  console.log('after 1.5 seconds');
+}</code></pre>
+
+  <h3>Angle Conversions</h3>
+  <pre><code class="language-javascript">Anim233.degToRad(180)  // Math.PI
+Anim233.radToDeg(Math.PI)  // 180</code></pre>
+
+  <div class="footer">Anim233 &copy; 2025 &middot; <a href="https://github.com/neko233-com/anim233-ts">GitHub</a></div>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="js/demos.js"></script>
+<script>
+function lerpDemo(t) {
+  t = parseFloat(t);
+  document.getElementById('lerp-fill').style.width = (t * 100) + '%';
+  document.getElementById('lerp-value').textContent = t.toFixed(2);
+}
+function clampDemo() {
+  const v = parseInt(document.getElementById('clamp-slider').value);
+  document.getElementById('clamp-input').textContent = v;
+  const clamped = Math.max(0, Math.min(100, v));
+  document.getElementById('clamp-output').textContent = clamped;
+}
+function mapRangeDemo() {
+  const v = parseFloat(document.getElementById('map-slider').value);
+  const mapped = 50 + v * 100;
+  document.getElementById('map-output').textContent = `Input: ${v.toFixed(2)} → Output: ${mapped.toFixed(0)}`;
+}
+</script>
+</body>
+</html>

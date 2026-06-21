@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Getting Started - Anim233</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+</head>
+<body>
+
+<div class="mobile-header"><button class="hamburger">&#9776;</button><h1>Anim233</h1></div>
+<div class="sidebar-overlay"></div>
+<aside class="sidebar">
+  <div class="sidebar-brand"><h1>Anim233</h1><span class="version">v1.0.0</span></div>
+  <nav>
+    <div class="nav-section">Getting Started</div>
+    <a href="index.html">Home</a>
+    <a href="getting-started.html">Installation</a>
+    <div class="nav-section">Core APIs</div>
+    <a href="tween.html">Tween (DOTween)</a>
+    <a href="animation.html">Animate (anime.js)</a>
+    <a href="timeline.html">Timeline</a>
+    <a href="easings.html">Easings</a>
+    <div class="nav-section">Advanced</div>
+    <a href="shader.html">Shader (WebGL)</a>
+    <a href="draggable.html">Draggable</a>
+    <a href="scroll.html">Scroll</a>
+    <a href="text.html">Text Effects</a>
+    <a href="svg.html">SVG Animation</a>
+    <div class="nav-section">Reference</div>
+    <a href="utilities.html">Utilities</a>
+    <a href="api-reference.html">API Reference</a>
+  </nav>
+</aside>
+
+<main class="main">
+  <h1>Getting Started</h1>
+  <p>Install Anim233 and start animating in under a minute.</p>
+
+  <h2>Installation</h2>
+
+  <h3>npm / yarn</h3>
+  <pre><code class="language-bash">npm install anim233-ts
+# or
+yarn add anim233-ts</code></pre>
+
+  <h3>CDN (UMD)</h3>
+  <pre><code class="language-html">&lt;script src="https://unpkg.com/anim233-ts@latest/dist/index.min.js"&gt;&lt;/script&gt;</code></pre>
+  <div class="note">When loaded via CDN, <code>Anim233</code> is available as a global on <code>window</code>.</div>
+
+  <h3>ES Module Import</h3>
+  <pre><code class="language-javascript">import Anim233 from 'anim233-ts';
+// or import specific functions
+import { tween, animate, stagger } from 'anim233-ts';</code></pre>
+
+  <h2>Basic Usage</h2>
+
+  <h3>Tween (DOTween-style)</h3>
+  <div class="demo-box">
+    <div class="demo-title">Live Demo</div>
+    <div class="demo-area">
+      <div class="anim-box" id="gs-tween-box" style="margin-bottom:10px;"></div>
+      <button class="demo-btn" onclick="gsTweenDemo()">Run Tween</button>
+    </div>
+  </div>
+  <pre><code class="language-javascript">Anim233.tween('#box')
+  .to({ x: 200 }, 500, 'easeOutCubic')
+  .to({ y: -100 }, 500, 'easeInOutQuad')
+  .play();</code></pre>
+
+  <h3>Animate (anime.js-style)</h3>
+  <div class="demo-box">
+    <div class="demo-title">Live Demo</div>
+    <div class="demo-area">
+      <div class="anim-box" id="gs-anim-box" style="margin-bottom:10px;"></div>
+      <button class="demo-btn" onclick="gsAnimateDemo()">Run Animate</button>
+    </div>
+  </div>
+  <pre><code class="language-javascript">Anim233.animate({
+  targets: '#box',
+  x: 200,
+  rotate: 360,
+  duration: 1000,
+  ease: 'easeOutCubic',
+  loop: false
+});</code></pre>
+
+  <h3>Timeline</h3>
+  <pre><code class="language-javascript">const tl = Anim233.timeline();
+tl.add({ targets: '#a', x: 200, duration: 500 });
+tl.add({ targets: '#b', x: 200, duration: 500 }, '-=200');
+tl.play();</code></pre>
+
+  <h2>Module Structure</h2>
+  <p>Anim233 is a single-file, zero-dependency library. Everything is accessible through the <code>Anim233</code> namespace:</p>
+  <pre><code class="language-javascript">Anim233.animate()      // Core animation
+Anim233.tween()        // DOTween-style chain
+Anim233.timeline()     // Sequencing
+Anim233.animatable()   // Proxy-based reactive wrapper
+Anim233.draggable()    // Drag interaction
+Anim233.onScroll()     // Scroll observer
+Anim233.splitText()    // Text splitting
+Anim233.createShaderAnim233() // WebGL shaders
+Anim233.stagger()      // Stagger calculator
+// + 14 math utilities</code></pre>
+
+  <div class="footer">Anim233 &copy; 2025 &middot; <a href="https://github.com/neko233-com/anim233-ts">GitHub</a></div>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+<script src="js/demos.js"></script>
+<script>
+function gsTweenDemo() {
+  animReady(A => {
+    const el = document.getElementById('gs-tween-box');
+    el.style.transform = 'translate(0,0) rotate(0deg) scale(1)';
+    A.tween(el)
+      .to({ x: 200, rotate: 180 }, 500, 'easeOutCubic')
+      .to({ y: -80, rotate: 360, scale: 1.3 }, 400, 'easeOutBack')
+      .to({ x: 0, y: 0, scale: 1, rotate: 540 }, 600, 'easeInOutQuad')
+      .play();
+  });
+}
+function gsAnimateDemo() {
+  animReady(A => {
+    const el = document.getElementById('gs-anim-box');
+    el.style.transform = 'translate(0,0) rotate(0deg)';
+    A.animate({
+      targets: el,
+      x: [0, 200, 0],
+      rotate: [0, 360, 720],
+      duration: 1500,
+      ease: 'easeOutCubic'
+    });
+  });
+}
+</script>
+</body>
+</html>
