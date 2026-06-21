@@ -1,0 +1,42 @@
+{
+  "name": "anim233-ts",
+  "version": "0.1.0",
+  "description": "neko233-com 编写, 其目的是增强版的 anime.js ，提供更多更加现代化的动画，且绝对傻瓜式 + agent first 的动画库",
+  "main": "dist/index.min.js",
+  "module": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc && vite build",
+    "dev": "vite",
+    "test": "vitest",
+    "lint": "eslint src --ext .ts,.tsx",
+    "typecheck": "tsc --noEmit"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/neko233-com/anim233-ts.git"
+  },
+  "keywords": [
+    "animation",
+    "anime",
+    "typescript",
+    "shader",
+    "webgl",
+    "canvas"
+  ],
+  "author": "neko233-com",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/neko233-com/anim233-ts/issues"
+  },
+  "homepage": "https://github.com/neko233-com/anim233-ts#readme",
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "vite": "^5.0.0",
+    "vitest": "^1.0.0",
+    "terser": "^5.0.0"
+  }
+}
