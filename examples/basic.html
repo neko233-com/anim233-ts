@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anim233 Example</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: #1a1a2e;
+            color: #fff;
+        }
+        .container {
+            text-align: center;
+        }
+        .box {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            margin: 20px auto;
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .controls {
+            margin-top: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            background: #4ecdc4;
+            color: #1a1a2e;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover {
+            background: #45b7aa;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Anim233 Example</h1>
+        <div class="box" id="animatedBox">Click Me</div>
+        <div class="controls">
+            <button onclick="playAnimation()">Play</button>
+            <button onclick="pauseAnimation()">Pause</button>
+            <button onclick="restartAnimation()">Restart</button>
+        </div>
+        <p>Click the box or use the buttons to control the animation</p>
+    </div>
+
+    <script src="https://unpkg.com/anim233-ts/dist/index.min.js"></script>
+    <script>
+        let animation;
+
+        // Initialize animation
+        function initAnimation() {
+            animation = Anim233.animate('#animatedBox', {
+                translateX: 100,
+                scale: 1.2,
+                rotate: '10deg'
+            }, {
+                duration: 1000,
+                easing: 'easeInOutQuad',
+                direction: 'alternate',
+                loop: true
+            });
+        }
+
+        // Control functions
+        function playAnimation() {
+            if (animation) {
+                animation.play();
+            }
+        }
+
+        function pauseAnimation() {
+            if (animation) {
+                animation.pause();
+            }
+        }
+
+        function restartAnimation() {
+            if (animation) {
+                animation.restart();
+            }
+        }
+
+        // Click to toggle animation
+        document.getElementById('animatedBox').addEventListener('click', function() {
+            if (!animation) {
+                initAnimation();
+            } else {
+                if (animation.isPlaying) {
+                    animation.pause();
+                } else {
+                    animation.play();
+                }
+            }
+        });
+
+        // Start animation on load
+        window.addEventListener('load', initAnimation);
+    </script>
+</body>
+</html>
