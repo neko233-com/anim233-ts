@@ -3,28 +3,26 @@
 [![npm version](https://img.shields.io/npm/v/anim233-ts.svg)](https://www.npmjs.com/package/anim233-ts)
 [![license](https://img.shields.io/npm/l/anim233-ts.svg)](https://github.com/neko233-com/anim233-ts/blob/main/LICENSE)
 
-neko233-com 编写, 其目的是增强版的 anime.js ，提供更多更加现代化的动画，且绝对傻瓜式 + agent first 的动画库
+增强版 anime.js v4 + DOTween 风格链式 API + Shader 支持
 
 ## Features
 
-- 🎨 **Modern Animations** - CSS transforms, colors, SVG, and more
-- 🚀 **TypeScript Native** - Full type safety and IntelliSense
-- 📦 **Lightweight** - Small bundle size with tree-shaking
-- 🔌 **Extensible** - Plugin system for custom easings and properties
-- 🎯 **Agent First** - Designed for AI-assisted development
-- 🌐 **CDN Ready** - Works with unpkg, jsDelivr, and cdnjs
-- 🖥️ **WebGL Shader Support** - Create custom shader animations
-- 📱 **Dual Mode** - Supports both ES modules and script tags
+- 🎯 **DOTween 风格** - 链式 API，类似 Unity DOTween Pro
+- 🎨 **完整 anime.js v4** - 支持所有动画功能
+- 🖥️ **ShaderAnim233** - 原生 WebGL Shader 动画
+- 🚀 **高性能** - 优化的动画引擎
+- 🔌 **Agent First** - 为 AI 辅助开发设计
+- 📱 **双模式** - 支持 ES Modules 和 script 标签
 
 ## Installation
 
-### npm (Recommended)
+### npm
 
 ```bash
 npm install anim233-ts
 ```
 
-### CDN (No Build Required)
+### CDN
 
 ```html
 <script src="https://unpkg.com/anim233-ts/dist/index.min.js"></script>
@@ -32,14 +30,29 @@ npm install anim233-ts
 
 ## Quick Start
 
-### TypeScript / ES Modules
+### DOTween 风格链式动画
+
+```typescript
+import { tween } from 'anim233-ts';
+
+// 链式动画 - 类似 Unity DOTween
+tween('.box')
+  .to({ x: 100, y: 50 }, 500, 'easeOutCubic')
+  .to({ scale: 1.5, rotate: 45 }, 300, 'easeInOutQuad')
+  .delay(100)
+  .loop(2)
+  .yoyo(true)
+  .onComplete(() => console.log('Done!'))
+  .play();
+```
+
+### anime.js 风格
 
 ```typescript
 import { Anim233 } from 'anim233-ts';
 
-// Basic animation
 Anim233.animate('.box', {
-  translateX: 100,
+  x: 100,
   opacity: 0.5
 }, {
   duration: 1000,
@@ -47,204 +60,116 @@ Anim233.animate('.box', {
 });
 ```
 
-### HTML (No Build Required)
-
-```html
-<!DOCTYPE html>
-<html>
-<head>
-  <script src="https://unpkg.com/anim233-ts/dist/index.min.js"></script>
-</head>
-<body>
-  <div class="box">Hello</div>
-  <script>
-    Anim233.animate('.box', {
-      translateX: 100,
-      opacity: 0.5
-    }, {
-      duration: 1000,
-      easing: 'easeInOutQuad'
-    });
-  </script>
-</body>
-</html>
-```
-
-## API
-
-### Core Functions
-
-#### `Anim233.animate(targets, properties, options)`
-
-Creates and returns an animation instance.
-
-**Parameters:**
-- `targets`: CSS selector string, HTMLElement, or array of elements
-- `properties`: Object with target property values
-- `options`: Animation configuration object
-
-**Options:**
-- `duration`: Animation duration in ms (default: 1000)
-- `easing`: Easing function or name (default: 'easeInOutQuad')
-- `delay`: Delay before animation starts in ms (default: 0)
-- `loop`: Number of times to loop or `true` for infinite (default: false)
-- `direction`: 'normal', 'reverse', or 'alternate' (default: 'normal')
-- `onUpdate`: Callback function called on each frame
-- `onComplete`: Callback function called when animation completes
-- `debug`: Enable debug logging (default: false)
-
-#### `Anim233.timeline()`
-
-Creates a timeline for sequencing animations.
+### Shader 动画
 
 ```typescript
-const tl = Anim233.timeline();
-tl.add(() => Anim233.animate('.box1', { x: 100 }), 0);
-tl.add(() => Anim233.animate('.box2', { x: 200 }), 500);
-tl.play();
-```
+import { createShaderAnim233 } from 'anim233-ts';
 
-#### `Anim233.createShader(options)`
-
-Creates a WebGL shader animation.
-
-```typescript
-const shader = Anim233.createShader({
+const shader = createShaderAnim233({
   target: document.getElementById('canvas'),
   fragment: `
     precision mediump float;
     uniform float time;
+    uniform vec2 resolution;
     void main() {
-      gl_FragColor = vec4(sin(time), cos(time), 0.5, 1.0);
+      vec2 uv = gl_FragCoord.xy / resolution;
+      float color = sin(uv.x * 10.0 + time) * 0.5 + 0.5;
+      gl_FragColor = vec4(color, uv.y, sin(time * 0.5), 1.0);
     }
   `
 });
 shader.play();
 ```
 
-### Animation Instance Methods
+## API
 
-- `play()`: Start or resume animation
-- `pause()`: Pause animation
-- `reverse()`: Reverse animation direction
-- `restart()`: Restart animation from beginning
-- `seek(time)`: Seek to specific time in ms
-- `destroy()`: Clean up animation resources
-
-**Properties:**
-- `isPlaying`: Boolean indicating if animation is playing
-- `progress`: Current progress (0-1)
-- `currentTime`: Current time in ms
-
-### Utility Functions
-
-#### `Anim233.wait(ms)`
-
-Returns a promise that resolves after specified milliseconds.
+### Tween (DOTween Style)
 
 ```typescript
-await Anim233.wait(1000);
-console.log('1 second passed');
+tween(target)
+  .to(properties, duration, easing)
+  .from(properties, duration, easing)
+  .fromTo(fromProps, toProps, duration, easing)
+  .set(properties)
+  .delay(ms)
+  .loop(count)
+  .yoyo(enable)
+  .play()
+  .pause()
+  .resume()
+  .restart()
+  .reverse()
+  .kill()
+  .onBegin(callback)
+  .onComplete(callback)
+  .onUpdate(callback)
+  .onLoop(callback)
 ```
 
-#### `Anim233.stagger(items, delay)`
-
-Executes items with a stagger delay.
+### Animation
 
 ```typescript
-Anim233.stagger([
-  () => Anim233.animate('.box1', { x: 100 }),
-  () => Anim233.animate('.box2', { x: 100 }),
-  () => Anim233.animate('.box3', { x: 100 })
-], 100); // 100ms between each
+Anim233.animate(targets, properties, options)
 ```
 
-#### `Anim233.spring(options)`
-
-Creates a spring physics simulation.
+### Timeline
 
 ```typescript
-const spring = Anim233.spring({
-  target: 100,
-  stiffness: 0.1,
-  damping: 0.8
-});
-
-function update() {
-  const value = spring.update();
-  element.style.transform = `translateX(${value}px)`;
-  requestAnimationFrame(update);
-}
-update();
+Anim233.timeline(options)
+  .add(animation, timeOffset)
+  .set(properties, timeOffset)
+  .call(callback, timeOffset)
+  .play()
+  .pause()
 ```
 
-### Easing Functions
-
-- `linear`
-- `easeInQuad`, `easeOutQuad`, `easeInOutQuad`
-- `easeInCubic`, `easeOutCubic`, `easeInOutCubic`
-- `easeInExpo`, `easeOutExpo`, `easeInOutExpo`
-
-### Custom Easings
+### Utilities
 
 ```typescript
+// 数学工具
+Anim233.random(min, max)
+Anim233.clamp(value, min, max)
+Anim233.lerp(start, end, t)
+Anim233.snap(value, grid)
+Anim233.wrap(value, min, max)
+Anim233.mapRange(value, inMin, inMax, outMin, outMax)
+Anim233.degToRad(deg)
+Anim233.radToDeg(rad)
+
+// 列表工具
+Anim233.stagger(value, options)
+Anim233.randomPick(array)
+Anim233.shuffle(array)
+
+// 时间工具
+Anim233.wait(ms)
+```
+
+### Easings
+
+```typescript
+// 获取所有可用缓动函数
+Anim233.listEasings()
+
+// 注册自定义缓动
 Anim233.registerEasing('myEasing', (t) => t * t * t);
+```
 
-Anim233.animate('.box', {
-  x: 100
-}, {
-  duration: 1000,
-  easing: 'myEasing'
+### ShaderAnim233
+
+```typescript
+const shader = Anim233.createShaderAnim233({
+  target: canvasElement,
+  vertex: vertexShaderSource,
+  fragment: fragmentShaderSource,
+  uniforms: { speed: 1.0 }
 });
-```
 
-## Agent-First Features
-
-Anim233 is designed for AI-assisted development:
-
-### Debug Mode
-
-```typescript
-Anim233.setDebug(true); // Enable debug logging
-```
-
-### Introspection
-
-```typescript
-const instance = Anim233.animate('.box', { x: 100 });
-console.log(instance.progress); // 0-1
-console.log(instance.currentTime); // ms
-console.log(instance.isPlaying); // boolean
-```
-
-### List Available Easings
-
-```typescript
-console.log(Anim233.listEasings());
-// ['linear', 'easeInQuad', 'easeOutQuad', ...]
-```
-
-## Shader Example
-
-```html
-<canvas id="canvas" width="400" height="400"></canvas>
-<script>
-  const shader = Anim233.createShader({
-    target: document.getElementById('canvas'),
-    fragment: `
-      precision mediump float;
-      uniform float time;
-      uniform vec2 resolution;
-      
-      void main() {
-        vec2 uv = gl_FragCoord.xy / resolution;
-        float color = sin(uv.x * 10.0 + time) * 0.5 + 0.5;
-        gl_FragColor = vec4(color, uv.y, sin(time * 0.5), 1.0);
-      }
-    `
-  });
-  shader.play();
-</script>
+shader.play();
+shader.pause();
+shader.setUniform('speed', 2.0);
+shader.setFragmentShader(newSource);
+shader.resize(800, 600);
 ```
 
 ## Browser Support
@@ -264,9 +189,4 @@ console.log(Anim233.listEasings());
 
 ## License
 
-This project is licensed under the Apache-2.0 License - see the [LICENSE](LICENSE) file for details.
-
-## Acknowledgments
-
-- Inspired by [anime.js](https://github.com/juliangarnier/anime)
-- Built with TypeScript and modern web APIs
+Apache-2.0
