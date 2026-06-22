@@ -985,11 +985,14 @@ function createAnimation(options: AnimationOptions): AnimationInstance {
   let _reversed = options.reversed || false;
   let _autoplay = options.autoplay !== false;
   let _playbackRate = options.playbackRate || 1;
+  const _playbackEase = options.playbackEase;
+  const _frameRate = options.frameRate;
   let _paused = false;
   let _began = false;
   let _completed = false;
   let _animationFrame = 0;
   let _startTime = 0;
+  let _lastFrameTime = 0;
   let _resolvePromise: () => void;
   const _finished = new Promise<void>(resolve => { _resolvePromise = resolve; });
 
@@ -1067,6 +1070,16 @@ function createAnimation(options: AnimationOptions): AnimationInstance {
   function tick(): void {
     if (_paused) return;
     const now = performance.now();
+
+    if (_frameRate) {
+      const frameInterval = 1000 / _frameRate;
+      if (now - _lastFrameTime < frameInterval) {
+        _animationFrame = requestAnimationFrame(tick);
+        return;
+      }
+      _lastFrameTime = now;
+    }
+
     const elapsed = (now - _startTime) * _playbackRate;
     _currentTime = elapsed;
 
@@ -1075,12 +1088,18 @@ function createAnimation(options: AnimationOptions): AnimationInstance {
       if (options.onBegin) options.onBegin(instance);
     }
 
-    const progress = Math.min(elapsed / _duration, 1);
+    let progress = Math.min(elapsed / _duration, 1);
+
+    if (_playbackEase) {
+      progress = applyEasing(progress, _playbackEase);
+    }
+
+    if (options.onBeforeUpdate) options.onBeforeUpdate(instance);
     updateProperties(progress);
     if (options.onUpdate) options.onUpdate(instance);
     if (options.onRender) options.onRender(instance);
 
-    if (progress < 1) {
+    if (elapsed < _duration) {
       _animationFrame = requestAnimationFrame(tick);
     } else {
       _completed = true;
@@ -1091,12 +1110,14 @@ function createAnimation(options: AnimationOptions): AnimationInstance {
         _loop--;
         _currentTime = 0;
         _startTime = performance.now();
+        _lastFrameTime = 0;
         if (_alternate) _reversed = !_reversed;
         if (options.onLoop) options.onLoop(instance);
         _animationFrame = requestAnimationFrame(tick);
       } else if (_loop === Infinity) {
         _currentTime = 0;
         _startTime = performance.now();
+        _lastFrameTime = 0;
         if (_alternate) _reversed = !_reversed;
         if (options.onLoop) options.onLoop(instance);
         _animationFrame = requestAnimationFrame(tick);
@@ -1114,54 +1135,160 @@ function createAnimation(options: AnimationOptions): AnimationInstance {
 // ============================================================
 
 function createTimeline(options: TimelineOptions = {}): TimelineInstance {
-  const items: Array<{ time: number; item: any; type: string }> = [];
+  interface TimelineItem {
+    time: number;
+    item: any;
+    type: string;
+    duration?: number;
+    fired?: boolean;
+    label?: string;
+  }
+  const items: TimelineItem[] = [];
+  const labels: Record<string, number> = {};
   let _duration = 0;
   let _currentTime = 0;
   let _paused = true;
   let _reversed = false;
   let _animationFrame = 0;
   let _startTime = 0;
-  let _loop = options.loop || 1;
+  let _loop = options.loop === true ? Infinity : (options.loop || 1);
+  let _loopCount = 0;
   let _playbackRate = options.playbackRate || 1;
+  let _completed = false;
   let _resolvePromise: () => void;
   const _finished = new Promise<void>(resolve => { _resolvePromise = resolve; });
 
+  function recalcDuration(): void {
+    let max = 0;
+    for (const it of items) {
+      const end = it.time + (it.duration || 0);
+      if (end > max) max = end;
+    }
+    _duration = max || 1;
+  }
+
   const instance: TimelineInstance = {
     add(animation: any, timeOffset?: number | string) {
-      const time = typeof timeOffset === 'number' ? timeOffset : parseFloat(timeOffset || '0') || 0;
-      items.push({ time, item: animation, type: 'animation' });
-      _duration = Math.max(_duration, time + 1000);
+      const time = typeof timeOffset === 'number' ? timeOffset : parseTimeOffset(timeOffset);
+      let dur = 1000;
+      if (animation && typeof animation === 'object' && typeof animation.duration === 'number') {
+        dur = animation.duration;
+      } else if (animation && typeof animation === 'object' && animation.targets) {
+        dur = options.defaults?.duration || 1000;
+      }
+      items.push({ time, item: animation, type: 'animation', duration: dur });
+      recalcDuration();
       return instance;
     },
     set(properties: Record<string, any>, timeOffset?: number | string) {
-      const time = typeof timeOffset === 'number' ? timeOffset : parseFloat(timeOffset || '0') || 0;
-      items.push({ time, item: properties, type: 'set' });
+      const time = typeof timeOffset === 'number' ? timeOffset : parseTimeOffset(timeOffset);
+      items.push({ time, item: properties, type: 'set', duration: 0 });
       return instance;
     },
     sync(animation: AnimationInstance, timeOffset?: number | string) {
-      const time = typeof timeOffset === 'number' ? timeOffset : parseFloat(timeOffset || '0') || 0;
-      items.push({ time, item: animation, type: 'animation' });
+      const time = typeof timeOffset === 'number' ? timeOffset : parseTimeOffset(timeOffset);
+      items.push({ time, item: animation, type: 'sync', duration: animation.duration || 1000 });
+      recalcDuration();
       return instance;
     },
-    label(_name: string, _timeOffset?: number | string) { return instance; },
-    remove(_animation: AnimationInstance) { return instance; },
+    label(name: string, timeOffset?: number | string) {
+      const time = typeof timeOffset === 'number' ? timeOffset : parseTimeOffset(timeOffset);
+      labels[name] = time;
+      items.push({ time, item: null, type: 'label', label: name, duration: 0 });
+      return instance;
+    },
+    remove(animation: AnimationInstance) {
+      const idx = items.findIndex(it => it.item === animation);
+      if (idx !== -1) items.splice(idx, 1);
+      recalcDuration();
+      return instance;
+    },
     call(callback: () => void, timeOffset?: number | string) {
-      const time = typeof timeOffset === 'number' ? timeOffset : parseFloat(timeOffset || '0') || 0;
-      items.push({ time, item: callback, type: 'callback' });
+      const time = typeof timeOffset === 'number' ? timeOffset : parseTimeOffset(timeOffset);
+      items.push({ time, item: callback, type: 'callback', duration: 0 });
       return instance;
     },
-    play() { _paused = false; _startTime = performance.now() - _currentTime / _playbackRate; tick(); return instance; },
+    play() {
+      if (_completed) {
+        _currentTime = 0;
+        _completed = false;
+        _loopCount = 0;
+        items.forEach(it => { it.fired = false; });
+      }
+      _paused = false;
+      _startTime = performance.now() - _currentTime / _playbackRate;
+      tick();
+      return instance;
+    },
     pause() { _paused = true; cancelAnimationFrame(_animationFrame); return instance; },
-    restart() { _currentTime = 0; instance.play(); return instance; },
-    reverse() { _reversed = !_reversed; return instance; },
-    alternate() { return instance; },
+    restart() {
+      _currentTime = 0;
+      _completed = false;
+      _loopCount = 0;
+      items.forEach(it => { it.fired = false; });
+      instance.play();
+      return instance;
+    },
+    reverse() {
+      _reversed = !_reversed;
+      if (_paused) {
+        _currentTime = _duration - _currentTime;
+      }
+      return instance;
+    },
+    alternate() {
+      _reversed = !_reversed;
+      return instance;
+    },
     resume() { if (_paused) instance.play(); return instance; },
-    complete() { return instance; },
-    cancel() { _paused = true; cancelAnimationFrame(_animationFrame); return instance; },
-    revert() { return instance; },
-    seek(time: number) { _currentTime = Math.max(0, Math.min(time, _duration)); return instance; },
-    stretch(newDuration: number) { _duration = newDuration; return instance; },
-    refresh() { return instance; },
+    complete() {
+      _currentTime = _duration;
+      _completed = true;
+      _paused = true;
+      cancelAnimationFrame(_animationFrame);
+      if (options.onComplete) options.onComplete(instance);
+      _resolvePromise();
+      return instance;
+    },
+    cancel() {
+      _paused = true;
+      cancelAnimationFrame(_animationFrame);
+      items.forEach(it => {
+        if (it.type === 'sync' && it.item && typeof it.item.cancel === 'function') {
+          it.item.cancel();
+        }
+      });
+      return instance;
+    },
+    revert() {
+      instance.cancel();
+      items.forEach(it => {
+        if (it.type === 'sync' && it.item && typeof it.item.revert === 'function') {
+          it.item.revert();
+        }
+      });
+      items.length = 0;
+      recalcDuration();
+      return instance;
+    },
+    seek(time: number) {
+      _currentTime = Math.max(0, Math.min(time, _duration));
+      updateAtTime(_currentTime);
+      return instance;
+    },
+    stretch(newDuration: number) {
+      const scale = newDuration / (_duration || 1);
+      items.forEach(it => {
+        it.time *= scale;
+        if (it.duration) it.duration *= scale;
+      });
+      _duration = newDuration;
+      return instance;
+    },
+    refresh() {
+      recalcDuration();
+      return instance;
+    },
     then(callback?: () => void) { return _finished.then(callback); },
     get duration() { return _duration; },
     get currentTime() { return _currentTime; },
@@ -1170,31 +1297,89 @@ function createTimeline(options: TimelineOptions = {}): TimelineInstance {
     get reversed() { return _reversed; }
   };
 
-  function tick(): void {
-    if (_paused) return;
-    const now = performance.now();
-    const elapsed = (now - _startTime) * _playbackRate;
-    _currentTime = elapsed;
+  function parseTimeOffset(offset?: number | string): number {
+    if (offset === undefined) return 0;
+    if (typeof offset === 'number') return offset;
+    if (offset.startsWith('<') || offset.startsWith('>')) {
+      const labelName = offset.slice(1);
+      const base = labels[labelName] ?? 0;
+      return offset.startsWith('>') ? base : base;
+    }
+    const num = parseFloat(offset);
+    return isNaN(num) ? 0 : num;
+  }
 
-    items.forEach(item => {
-      if (elapsed >= item.time) {
-        if (item.type === 'callback' && typeof item.item === 'function') {
-          item.item();
-        } else if (item.type === 'set' && typeof item.item === 'object') {
+  function updateAtTime(time: number): void {
+    const effectiveTime = _reversed ? _duration - time : time;
+    for (const it of items) {
+      if (it.type === 'label') continue;
+      if (effectiveTime >= it.time) {
+        if (it.type === 'callback' && typeof it.item === 'function') {
+          if (!it.fired) {
+            it.fired = true;
+            it.item();
+          }
+        } else if (it.type === 'set' && typeof it.item === 'object') {
+          if (!it.fired) {
+            it.fired = true;
+          }
+        } else if (it.type === 'sync' && it.item) {
+          const localProgress = it.duration ? Math.min(1, (effectiveTime - it.time) / it.duration) : 1;
+          it.item.seek(localProgress * (it.item.duration || 0));
         }
+      } else {
+        it.fired = false;
       }
-    });
-
-    if (elapsed < _duration) {
-      _animationFrame = requestAnimationFrame(tick);
-    } else {
-      _completed = true;
-      if (options.onComplete) options.onComplete(instance);
-      _resolvePromise();
     }
   }
 
-  let _completed = false;
+  function tick(): void {
+    if (_paused) return;
+    const now = performance.now();
+    const delta = (now - _startTime) * _playbackRate - _currentTime;
+    _currentTime = (now - _startTime) * _playbackRate;
+
+    if (_reversed) _currentTime = _duration - _currentTime;
+
+    updateAtTime(_currentTime);
+
+    if (options.onUpdate) options.onUpdate(instance);
+
+    const checkTime = _reversed ? _duration - _currentTime : _currentTime;
+    if (checkTime >= _duration && !_reversed) {
+      if (_loop === Infinity || _loop > 1) {
+        if (_loop !== Infinity) _loop--;
+        _loopCount++;
+        _currentTime = 0;
+        _startTime = performance.now();
+        items.forEach(it => { it.fired = false; });
+        _animationFrame = requestAnimationFrame(tick);
+      } else {
+        _completed = true;
+        _paused = true;
+        if (options.onComplete) options.onComplete(instance);
+        _resolvePromise();
+      }
+    } else if (checkTime <= 0 && _reversed) {
+      if (_loop === Infinity || _loop > 1) {
+        if (_loop !== Infinity) _loop--;
+        _loopCount++;
+        _currentTime = _duration;
+        _startTime = performance.now() - _duration / _playbackRate;
+        items.forEach(it => { it.fired = false; });
+        _animationFrame = requestAnimationFrame(tick);
+      } else {
+        _completed = true;
+        _paused = true;
+        if (options.onComplete) options.onComplete(instance);
+        _resolvePromise();
+      }
+    } else {
+      _animationFrame = requestAnimationFrame(tick);
+    }
+  }
+
+  recalcDuration();
   return instance;
 }
 
@@ -1344,7 +1529,7 @@ function createDraggable(target: HTMLElement, options: DraggableOptions = {}): D
 
     const bounds = getContainerBounds();
     if (bounds) {
-      newX = clampToBounds(newX, bounds.minX, bounds.maxY, 0.1);
+      newX = clampToBounds(newX, bounds.minX, bounds.maxX, 0.1);
       newY = clampToBounds(newY, bounds.minY, bounds.maxY, 0.1);
     }
 
@@ -1477,8 +1662,31 @@ function createDraggable(target: HTMLElement, options: DraggableOptions = {}): D
     enable() { _isEnabled = true; return instance; },
     setX(value: number) { _x = value; applyPosition(); return instance; },
     setY(value: number) { _y = value; applyPosition(); return instance; },
-    animateInView() { return instance; },
-    scrollInView() { return instance; },
+    animateInView() {
+      const rect = target.getBoundingClientRect();
+      const viewW = window.innerWidth;
+      const viewH = window.innerHeight;
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+      if (centerX < 0 || centerX > viewW || centerY < 0 || centerY > viewH) {
+        const targetX = _x + (viewW / 2 - centerX);
+        const targetY = _y + (viewH / 2 - centerY);
+        createAnimation({
+          targets: target,
+          duration: 600,
+          ease: 'easeOutCubic',
+          onComplete: () => {
+            _x = targetX;
+            _y = targetY;
+          }
+        });
+      }
+      return instance;
+    },
+    scrollInView() {
+      target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return instance;
+    },
     stop() {
       _isDragging = false;
       _pointerDown = false;
@@ -1497,7 +1705,10 @@ function createDraggable(target: HTMLElement, options: DraggableOptions = {}): D
       if (triggerEl) triggerEl.removeEventListener('pointerdown', onPointerDown);
       return instance;
     },
-    refresh() { return instance; },
+    refresh() {
+      applyPosition();
+      return instance;
+    },
     get x() { return _x; },
     get y() { return _y; },
     get isDragging() { return _isDragging; }
@@ -1599,7 +1810,9 @@ function createScrollObserver(options: ScrollObserverOptions = {}): ScrollObserv
     });
 
     if (direction === 'forward' && options.onEnterForward) {
+      options.onEnterForward(null as any);
     } else if (direction === 'backward' && options.onEnterBackward) {
+      options.onEnterBackward(null as any);
     }
   }
 
@@ -1867,23 +2080,23 @@ function createLayout(options: LayoutOptions = {}): LayoutInstance {
         pause() { tl.pause(); return this as any; },
         restart() { tl.restart(); return this as any; },
         reverse() { tl.reverse(); return this as any; },
-        alternate() { return this as any; },
+        alternate() { tl.alternate(); return this as any; },
         resume() { tl.resume(); return this as any; },
-        complete() { return this as any; },
+        complete() { tl.complete(); return this as any; },
         cancel() { tl.cancel(); return this as any; },
-        revert() { return this as any; },
-        reset() { return this as any; },
+        revert() { tl.revert(); return this as any; },
+        reset() { tl.restart(); return this as any; },
         seek(time: number) { tl.seek(time); return this as any; },
         stretch(d: number) { tl.stretch(d); return this as any; },
         then(cb?: () => void) { return tl.then(cb); },
-        get finished() { return Promise.resolve(); },
+        get finished() { return tl.then(); },
         get currentTime() { return tl.currentTime; },
         get progress() { return tl.progress; },
         get duration() { return tl.duration; },
         get paused() { return tl.paused; },
         get reversed() { return tl.reversed; },
-        get began() { return false; },
-        get completed() { return false; }
+        get began() { return tl.progress > 0; },
+        get completed() { return tl.progress >= 1; }
       } as AnimationInstance;
     },
     revert() {
@@ -1905,14 +2118,43 @@ function createLayout(options: LayoutOptions = {}): LayoutInstance {
 
 function createPathMorph(target: SVGPathElement | HTMLElement): PathMorphInstance {
   const getD = () => (target as SVGPathElement).getAttribute('d') || '';
+  let _startD = getD();
+
+  function interpolatePath(from: string, to: string, t: number): string {
+    const fromNums = from.match(/-?\d*\.?\d+/g)?.map(Number) || [];
+    const toNums = to.match(/-?\d*\.?\d+/g)?.map(Number) || [];
+    const len = Math.max(fromNums.length, toNums.length);
+    const resultNums: number[] = [];
+    for (let i = 0; i < len; i++) {
+      const fv = i < fromNums.length ? fromNums[i] : (fromNums[fromNums.length - 1] ?? 0);
+      const tv = i < toNums.length ? toNums[i] : (toNums[toNums.length - 1] ?? 0);
+      resultNums.push(fv + (tv - fv) * t);
+    }
+    let idx = 0;
+    return to.replace(/-?\d*\.?\d+/g, () => {
+      return String(Math.round(resultNums[idx++] * 1000) / 1000);
+    });
+  }
 
   const instance: PathMorphInstance = {
     to(pathData: string, duration: number = 400, ease: EasingName | EasingFunction | string = 'easeOutCubic'): TweenInstance {
       const startD = getD();
-      return tween(target as HTMLElement).to({ d: pathData } as any, duration, ease);
+      _startD = startD;
+      return tween(target as HTMLElement)
+        .to({ opacity: 1 } as any, duration, ease)
+        .onUpdate((progress) => {
+          (target as SVGPathElement).setAttribute('d', interpolatePath(startD, pathData, progress));
+        });
     },
     from(pathData: string, duration: number = 400, ease: EasingName | EasingFunction | string = 'easeOutCubic'): TweenInstance {
-      return tween(target as HTMLElement).from({ d: pathData } as any, duration, ease);
+      const endD = getD();
+      _startD = pathData;
+      (target as SVGPathElement).setAttribute('d', pathData);
+      return tween(target as HTMLElement)
+        .to({ opacity: 1 } as any, duration, ease)
+        .onUpdate((progress) => {
+          (target as SVGPathElement).setAttribute('d', interpolatePath(pathData, endD, progress));
+        });
     },
     set(pathData: string): PathMorphInstance {
       (target as SVGPathElement).setAttribute('d', pathData);
@@ -2089,6 +2331,430 @@ export function createShader(options: ShaderOptions): ShaderAnim233Instance {
 }
 
 // ============================================================
+// Animation Groups
+// ============================================================
+
+export interface AnimationGroup {
+  add(animations: AnimationInstance | AnimationInstance[]): AnimationGroup;
+  remove(animation: AnimationInstance): AnimationGroup;
+  play(): AnimationGroup;
+  pause(): AnimationGroup;
+  restart(): AnimationGroup;
+  reverse(): AnimationGroup;
+  resume(): AnimationGroup;
+  cancel(): AnimationGroup;
+  revert(): AnimationGroup;
+  kill(): AnimationGroup;
+  then(callback?: () => void): Promise<void>;
+  readonly animations: AnimationInstance[];
+  readonly duration: number;
+  readonly currentTime: number;
+  readonly progress: number;
+  readonly paused: boolean;
+}
+
+export function createAnimationGroup(): AnimationGroup {
+  const _animations: AnimationInstance[] = [];
+  let _resolvePromise: () => void;
+  const _finished = new Promise<void>(resolve => { _resolvePromise = resolve; });
+
+  const instance: AnimationGroup = {
+    add(animations: AnimationInstance | AnimationInstance[]) {
+      if (Array.isArray(animations)) _animations.push(...animations);
+      else _animations.push(animations);
+      return instance;
+    },
+    remove(animation: AnimationInstance) {
+      const idx = _animations.indexOf(animation);
+      if (idx !== -1) _animations.splice(idx, 1);
+      return instance;
+    },
+    play() {
+      _animations.forEach(a => a.play());
+      return instance;
+    },
+    pause() {
+      _animations.forEach(a => a.pause());
+      return instance;
+    },
+    restart() {
+      _animations.forEach(a => a.restart());
+      return instance;
+    },
+    reverse() {
+      _animations.forEach(a => a.reverse());
+      return instance;
+    },
+    resume() {
+      _animations.forEach(a => a.resume());
+      return instance;
+    },
+    cancel() {
+      _animations.forEach(a => a.cancel());
+      return instance;
+    },
+    revert() {
+      _animations.forEach(a => a.revert());
+      return instance;
+    },
+    kill() {
+      _animations.forEach(a => a.cancel());
+      _animations.length = 0;
+      return instance;
+    },
+    then(callback?: () => void) {
+      return Promise.all(_animations.map(a => a.finished)).then(() => {
+        if (callback) callback();
+      });
+    },
+    get animations() { return _animations; },
+    get duration() { return Math.max(0, ..._animations.map(a => a.duration)); },
+    get currentTime() { return Math.max(0, ..._animations.map(a => a.currentTime)); },
+    get progress() {
+      const dur = instance.duration;
+      return dur ? instance.currentTime / dur : 0;
+    },
+    get paused() { return _animations.every(a => a.paused); }
+  };
+
+  return instance;
+}
+
+// ============================================================
+// Virtual List
+// ============================================================
+
+export interface VirtualListOptions<T = any> {
+  container: HTMLElement | string;
+  items: T[];
+  itemHeight: number | ((item: T, index: number) => number);
+  renderItem: (item: T, index: number) => HTMLElement;
+  overscan?: number;
+  scrollElement?: HTMLElement;
+  onScroll?: (scrollTop: number, startIndex: number, endIndex: number) => void;
+}
+
+export interface VirtualListInstance<T = any> {
+  setItems(items: T[]): VirtualListInstance<T>;
+  scrollToIndex(index: number, smooth?: boolean): VirtualListInstance<T>;
+  scrollToTop(smooth?: boolean): VirtualListInstance<T>;
+  refresh(): VirtualListInstance<T>;
+  destroy(): void;
+  readonly startIndex: number;
+  readonly endIndex: number;
+  readonly visibleItems: T[];
+  readonly scrollTop: number;
+}
+
+export function createVirtualList<T = any>(options: VirtualListOptions<T>): VirtualListInstance<T> {
+  const containerEl = typeof options.container === 'string'
+    ? document.querySelector(options.container) as HTMLElement
+    : options.container;
+  
+  const overscan = options.overscan ?? 5;
+  let _items = [...options.items];
+  let _scrollTop = 0;
+  let _startIndex = 0;
+  let _endIndex = 0;
+  let _renderedItems: Map<number, HTMLElement> = new Map();
+  let _scrollElement: HTMLElement;
+  let _itemHeights: number[] = [];
+  let _totalHeight = 0;
+  let _offsetY = 0;
+
+  const wrapper = document.createElement('div');
+  wrapper.style.position = 'relative';
+  wrapper.style.overflow = 'auto';
+  wrapper.style.width = '100%';
+  wrapper.style.height = '100%';
+
+  const spacer = document.createElement('div');
+  spacer.style.position = 'relative';
+  spacer.style.width = '100%';
+  wrapper.appendChild(spacer);
+
+  containerEl.appendChild(wrapper);
+  _scrollElement = options.scrollElement || wrapper;
+
+  function getItemHeight(item: T, index: number): number {
+    if (typeof options.itemHeight === 'function') {
+      return options.itemHeight(item, index);
+    }
+    return options.itemHeight;
+  }
+
+  function calculatePositions(): void {
+    _itemHeights = _items.map((item, i) => getItemHeight(item, i));
+    _totalHeight = _itemHeights.reduce((sum, h) => sum + h, 0);
+    spacer.style.height = `${_totalHeight}px`;
+  }
+
+  function getStartIndex(scrollTop: number): number {
+    let accumulated = 0;
+    for (let i = 0; i < _items.length; i++) {
+      accumulated += _itemHeights[i];
+      if (accumulated > scrollTop) return i;
+    }
+    return _items.length - 1;
+  }
+
+  function getOffsetY(index: number): number {
+    let offset = 0;
+    for (let i = 0; i < index; i++) {
+      offset += _itemHeights[i];
+    }
+    return offset;
+  }
+
+  function render(): void {
+    const containerHeight = wrapper.clientHeight;
+    _startIndex = Math.max(0, getStartIndex(_scrollTop) - overscan);
+    _endIndex = Math.min(_items.length - 1, getStartIndex(_scrollTop + containerHeight) + overscan);
+
+    const newIndices = new Set<number>();
+    for (let i = _startIndex; i <= _endIndex; i++) {
+      newIndices.add(i);
+    }
+
+    for (const [index, el] of _renderedItems) {
+      if (!newIndices.has(index)) {
+        el.remove();
+        _renderedItems.delete(index);
+      }
+    }
+
+    for (let i = _startIndex; i <= _endIndex; i++) {
+      if (!_renderedItems.has(i)) {
+        const el = options.renderItem(_items[i], i);
+        el.style.position = 'absolute';
+        el.style.top = `${getOffsetY(i)}px`;
+        el.style.left = '0';
+        el.style.right = '0';
+        spacer.appendChild(el);
+        _renderedItems.set(i, el);
+      }
+    }
+
+    if (options.onScroll) {
+      options.onScroll(_scrollTop, _startIndex, _endIndex);
+    }
+  }
+
+  function onScroll(): void {
+    _scrollTop = _scrollElement.scrollTop;
+    render();
+  }
+
+  wrapper.addEventListener('scroll', onScroll, { passive: true });
+  calculatePositions();
+  render();
+
+  const instance: VirtualListInstance<T> = {
+    setItems(items: T[]) {
+      _items = [...items];
+      _renderedItems.forEach(el => el.remove());
+      _renderedItems.clear();
+      calculatePositions();
+      render();
+      return instance;
+    },
+    scrollToIndex(index: number, smooth = false) {
+      if (index < 0 || index >= _items.length) return instance;
+      const offset = getOffsetY(index);
+      wrapper.scrollTo({ top: offset, behavior: smooth ? 'smooth' : 'auto' });
+      return instance;
+    },
+    scrollToTop(smooth = false) {
+      wrapper.scrollTo({ top: 0, behavior: smooth ? 'smooth' : 'auto' });
+      return instance;
+    },
+    refresh() {
+      calculatePositions();
+      render();
+      return instance;
+    },
+    destroy() {
+      wrapper.removeEventListener('scroll', onScroll);
+      _renderedItems.forEach(el => el.remove());
+      _renderedItems.clear();
+      wrapper.remove();
+    },
+    get startIndex() { return _startIndex; },
+    get endIndex() { return _endIndex; },
+    get visibleItems() { return _items.slice(_startIndex, _endIndex + 1); },
+    get scrollTop() { return _scrollTop; }
+  };
+
+  return instance;
+}
+
+// ============================================================
+// List Animation
+// ============================================================
+
+export interface ListAnimationOptions {
+  container: HTMLElement | string;
+  duration?: number;
+  ease?: EasingName | EasingFunction | string;
+  stagger?: number | [number, number];
+  enterFrom?: Record<string, any>;
+  leaveTo?: Record<string, any>;
+  moveDuration?: number;
+}
+
+export interface ListAnimationInstance {
+  add(items: HTMLElement[], index?: number): AnimationInstance[];
+  remove(items: HTMLElement[]): AnimationInstance[];
+  reorder(fromIndex: number, toIndex: number): AnimationInstance;
+  animate(): AnimationInstance[];
+  revert(): ListAnimationInstance;
+  readonly items: HTMLElement[];
+}
+
+export function createListAnimation(options: ListAnimationOptions): ListAnimationInstance {
+  const containerEl = typeof options.container === 'string'
+    ? document.querySelector(options.container) as HTMLElement
+    : options.container;
+  
+  const duration = options.duration ?? 400;
+  const ease = options.ease ?? 'easeOutCubic';
+  const staggerDelay = options.stagger ?? 0;
+  const enterFrom = options.enterFrom ?? { opacity: 0, y: 20 };
+  const leaveTo = options.leaveTo ?? { opacity: 0, y: -20 };
+  const moveDuration = options.moveDuration ?? duration;
+
+  let _items: HTMLElement[] = Array.from(containerEl.children) as HTMLElement[];
+  let _positions: Map<HTMLElement, DOMRect> = new Map();
+
+  function recordPositions(): void {
+    _positions.clear();
+    _items.forEach(el => {
+      _positions.set(el, el.getBoundingClientRect());
+    });
+  }
+
+  function animateMove(els: HTMLElement[]): AnimationInstance[] {
+    const animations: AnimationInstance[] = [];
+    els.forEach((el, i) => {
+      const oldRect = _positions.get(el);
+      const newRect = el.getBoundingClientRect();
+      if (oldRect) {
+        const dx = oldRect.left - newRect.left;
+        const dy = oldRect.top - newRect.top;
+        if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) {
+          const anim = createAnimation({
+            targets: el,
+            duration: moveDuration,
+            delay: typeof staggerDelay === 'function' ? (staggerDelay as any)(i, els.length) : i * (staggerDelay as number),
+            translateX: `${dx}px`,
+            translateY: `${dy}px`,
+            onComplete: () => {
+              el.style.transform = '';
+            }
+          });
+          animations.push(anim);
+        }
+      }
+    });
+    return animations;
+  }
+
+  function animateEnter(els: HTMLElement[]): AnimationInstance[] {
+    const animations: AnimationInstance[] = [];
+    els.forEach((el, i) => {
+      const anim = createAnimation({
+        targets: el,
+        duration,
+        delay: typeof staggerDelay === 'function' ? (staggerDelay as any)(i, els.length) : i * (staggerDelay as number),
+        ...enterFrom
+      });
+      animations.push(anim);
+    });
+    return animations;
+  }
+
+  function animateLeave(els: HTMLElement[]): AnimationInstance[] {
+    const animations: AnimationInstance[] = [];
+    els.forEach((el, i) => {
+      const anim = createAnimation({
+        targets: el,
+        duration,
+        delay: typeof staggerDelay === 'function' ? (staggerDelay as any)(i, els.length) : i * (staggerDelay as number),
+        ...leaveTo,
+        onComplete: () => {
+          el.remove();
+        }
+      });
+      animations.push(anim);
+    });
+    return animations;
+  }
+
+  recordPositions();
+
+  const instance: ListAnimationInstance = {
+    add(items: HTMLElement[], index?: number) {
+      recordPositions();
+      const insertIndex = index ?? _items.length;
+      items.forEach((el, i) => {
+        containerEl.insertBefore(el, containerEl.children[insertIndex + i] || null);
+      });
+      _items = Array.from(containerEl.children) as HTMLElement[];
+      const moveAnims = animateMove(_items.filter(el => !items.includes(el)));
+      const enterAnims = animateEnter(items);
+      return [...moveAnims, ...enterAnims];
+    },
+    remove(items: HTMLElement[]) {
+      recordPositions();
+      const leaveAnims = animateLeave(items);
+      setTimeout(() => {
+        _items = Array.from(containerEl.children) as HTMLElement[];
+        animateMove(_items);
+      }, duration);
+      return leaveAnims;
+    },
+    reorder(fromIndex: number, toIndex: number) {
+      recordPositions();
+      const el = _items[fromIndex];
+      if (!el) return createAnimation({ targets: containerEl, duration: 0 });
+      
+      const ref = containerEl.children[toIndex] || null;
+      containerEl.insertBefore(el, ref);
+      _items = Array.from(containerEl.children) as HTMLElement[];
+      
+      const oldRect = _positions.get(el);
+      const newRect = el.getBoundingClientRect();
+      const dx = oldRect ? oldRect.left - newRect.left : 0;
+      const dy = oldRect ? oldRect.top - newRect.top : 0;
+      
+      return createAnimation({
+        targets: el,
+        duration: moveDuration,
+        translateX: `${dx}px`,
+        translateY: `${dy}px`,
+        onComplete: () => {
+          el.style.transform = '';
+        }
+      });
+    },
+    animate() {
+      _items = Array.from(containerEl.children) as HTMLElement[];
+      return animateEnter(_items);
+    },
+    revert() {
+      _items.forEach(el => {
+        el.style.transform = '';
+        el.style.opacity = '';
+      });
+      return instance;
+    },
+    get items() { return _items; }
+  };
+
+  return instance;
+}
+
+// ============================================================
 // Agent-Friendly API
 // ============================================================
 
@@ -2102,6 +2768,9 @@ export interface AgentAPI {
   splitText(target: HTMLElement, options?: TextSplitterOptions): TextSplitterInstance;
   layout(options?: LayoutOptions): LayoutInstance;
   pathMorph(target: SVGPathElement | HTMLElement): PathMorphInstance;
+  group(): AnimationGroup;
+  virtualList<T = any>(options: VirtualListOptions<T>): VirtualListInstance<T>;
+  listAnimation(options: ListAnimationOptions): ListAnimationInstance;
   animateClass(targets: AnimationTarget, options?: { add?: string; remove?: string; duration?: number; easing?: string }): AnimationInstance;
   createWAAPIAnimation(target: HTMLElement, keyframes: Keyframe[], options?: KeyframeAnimationOptions): Animation;
   createShader(options: ShaderOptions): ShaderAnim233Instance;
@@ -2160,6 +2829,9 @@ export const Anim233: AgentAPI = {
   splitText: createTextSplitter,
   layout: createLayout,
   pathMorph: createPathMorph,
+  group: createAnimationGroup,
+  virtualList: createVirtualList,
+  listAnimation: createListAnimation,
   animateClass: createAnimateClass,
   createWAAPIAnimation: createWAAPI,
   createShader,
